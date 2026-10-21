@@ -1,111 +1,95 @@
+// MythTube Frosted Glass Top Header — Clean, minimal bar with MythTube Aurora wordmark,
+// Live Server Status Pill (online server count + fastest latency), and quick actions.
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useRootNav } from '../navigation/types';
-import { useServerEngine } from '../services/serverEngine';
-import { colors, layout, radius } from '../theme/tokens';
-import { LivePulseDot } from './Animations';
-import { Wordmark } from './Logo';
+import { useRootNav, type RootStackParamList } from '../navigation/types';
+import { ensureServerEngineInitialized, useServerEngine } from '../services/serverEngine';
+import { colors, GRADIENTS, layout, radius } from '../theme/tokens';
+import { LivePulseDot, PressableScale } from './Animations';
+import { IconButton } from './Buttons';
+import { MythTubeWordmark } from './Logo';
 import { Txt } from './Txt';
 
-export type HeaderAction = 'downloads' | 'search' | 'menu' | 'servers';
+type ActionKind = 'search' | 'categories' | 'downloads';
 
-export type SearchScope = { genre?: string; kind?: 'movie' | 'series' | 'anime'; live?: boolean };
-
-interface ScreenHeaderProps {
+interface Props {
   title?: string;
   subtitle?: string;
+  logo?: boolean;
   back?: boolean;
-  actions?: HeaderAction[];
-  onMenu?: () => void;
-  left?: React.ReactNode;
   transparent?: boolean;
-  searchScope?: SearchScope;
+  right?: React.ReactNode;
+  left?: React.ReactNode;
+  children?: React.ReactNode;
+  hideSearch?: boolean;
+  hideServerPill?: boolean;
   showServerPill?: boolean;
-  onPressServerPill?: () => void;
+  actions?: ActionKind[];
+  searchScope?: RootStackParamList['Search'];
 }
 
-export function LiveServerStatusPill({ onPress }: { onPress?: () => void }) {
+export function LiveServerStatusPill({ onPress }: { onPress?: () => void } = {}) {
+  const nav = useRootNav();
   const { state, activeRoute } = useServerEngine();
-  const isScanning = state.phase !== 'IDLE';
-  const online = state.onlineCount;
+
+  useEffect(() => {
+    ensureServerEngineInitialized();
+  }, []);
+
+  const scanning = state.phase === 'QUICK_PROBE' || state.phase === 'SWEEPING';
+  const count = state.onlineCount;
+  const fastestMs = activeRoute?.latencyMs;
 
   return (
-    <Pressable onPress={onPress} style={styles.serverPill}>
-      <LivePulseDot
-        color={isScanning ? colors.cyan : online > 0 ? colors.online : colors.warning}
-        size={7}
-        pulsing={isScanning || online > 0}
-      />
-      <View style={{ marginLeft: 5 }}>
-        <Txt weight="bold" size={11} color={colors.text} numberOfLines={1}>
-          {isScanning
-            ? `Scanning ${state.sweepDone}/${state.sweepTotal}`
-            : `${online} servers online`}
-        </Txt>
-        <Txt size={9} color={colors.textMuted} numberOfLines={1}>
-          {state.preferredServerId && activeRoute
-            ? `Pin: ${activeRoute.name}`
-            : activeRoute
-              ? `Auto · ${activeRoute.name}`
-              : 'Tap to manage BDIX'}
-        </Txt>
-        {isScanning ? (
-          <View style={styles.sweepTrack}>
-            <View style={[styles.sweepFill, { width: `${Math.round(state.sweepProgress * 100)}%` }]} />
-          </View>
-        ) : null}
-      </View>
-      <Ionicons name="chevron-forward" size={12} color={colors.textMuted} style={{ marginLeft: 4 }} />
-    </Pressable>
+    <PressableScale
+      scaleTo={0.95}
+      onPress={onPress ?? (() => nav.navigate('Main', { screen: 'Servers' }))}
+      style={styles.serverPill}
+    >
+      <LivePulseDot color={count > 0 ? colors.mint : scanning ? colors.amber : colors.danger} size={6} />
+      <Txt weight="bold" size={11} color={colors.text} style={{ marginLeft: 4 }}>
+        {scanning && count === 0 ? 'Probing…' : `${count} Active`}
+      </Txt>
+      {fastestMs ? (
+        <View style={styles.latencyBadge}>
+          <Txt weight="bold" size={9} color={colors.mint}>
+            {fastestMs}ms
+          </Txt>
+        </View>
+      ) : null}
+    </PressableScale>
   );
 }
 
 export function HeaderActions({
-  actions,
-  onMenu,
+  actions = ['search'],
   searchScope,
 }: {
-  actions: HeaderAction[];
-  onMenu?: () => void;
-  searchScope?: SearchScope;
+  actions?: ActionKind[];
+  searchScope?: RootStackParamList['Search'];
 }) {
   const nav = useRootNav();
   return (
-    <View style={styles.actions}>
-      {actions.map((a) => {
-        switch (a) {
-          case 'servers':
-            return (
-              <Pressable key={a} hitSlop={8} onPress={() => nav.navigate('ServersModal')} style={styles.iconBtn}>
-                <MaterialCommunityIcons name="server-network" size={20} color={colors.cyan} />
-              </Pressable>
-            );
-          case 'downloads':
-            return (
-              <Pressable key={a} hitSlop={8} onPress={() => nav.navigate('Downloads')} style={styles.iconBtn}>
-                <Ionicons name="download-outline" size={20} color={colors.text} />
-              </Pressable>
-            );
-          case 'search':
-            return (
-              <Pressable key={a} hitSlop={8} onPress={() => nav.navigate('Search', searchScope)} style={styles.iconBtn}>
-                <Ionicons name="search" size={20} color={colors.text} />
-              </Pressable>
-            );
-          case 'menu':
-            return (
-              <Pressable key={a} hitSlop={8} onPress={onMenu} style={styles.iconBtn}>
-                <Ionicons name="options-outline" size={20} color={colors.text} />
-              </Pressable>
-            );
-          default:
-            return null;
-        }
-      })}
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      {actions.includes('downloads') ? (
+        <PressableScale scaleTo={0.92} onPress={() => nav.navigate('Downloads')} style={styles.actionBtn}>
+          <Ionicons name="download-outline" size={18} color={colors.text} />
+        </PressableScale>
+      ) : null}
+      {actions.includes('categories') ? (
+        <PressableScale scaleTo={0.92} onPress={() => nav.navigate('Categories')} style={styles.actionBtn}>
+          <Ionicons name="grid-outline" size={17} color={colors.text} />
+        </PressableScale>
+      ) : null}
+      {actions.includes('search') ? (
+        <PressableScale scaleTo={0.92} onPress={() => nav.navigate('Search', searchScope)} style={styles.actionBtn}>
+          <Ionicons name="search" size={18} color={colors.text} />
+        </PressableScale>
+      ) : null}
     </View>
   );
 }
@@ -113,102 +97,104 @@ export function HeaderActions({
 export function ScreenHeader({
   title,
   subtitle,
+  logo,
   back,
-  actions = [],
-  onMenu,
-  left,
   transparent,
-  searchScope,
+  right,
+  left,
+  children,
+  hideSearch,
+  hideServerPill,
   showServerPill,
-  onPressServerPill,
-}: ScreenHeaderProps) {
+  actions,
+  searchScope,
+}: Props) {
   const insets = useSafeAreaInsets();
   const nav = useRootNav();
-  return (
-    <View style={[styles.wrap, { paddingTop: insets.top, backgroundColor: transparent ? 'transparent' : colors.bg }]}>
+  const displayServerPill = showServerPill !== undefined ? showServerPill : !hideServerPill && !back;
+
+  const body = (
+    <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <View style={styles.bar}>
-        {back ? (
-          <Pressable hitSlop={10} onPress={() => nav.goBack()} style={styles.back}>
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          </Pressable>
-        ) : null}
-        {left ??
-          (title ? (
-            <View style={{ flex: 1 }}>
-              <Txt weight="bold" size={back ? 17 : 20} numberOfLines={1}>
+        <View style={styles.left}>
+          {back ? (
+            <IconButton icon="arrow-back" size={24} onPress={() => nav.goBack()} style={{ marginRight: 10 }} />
+          ) : null}
+          {logo ? <MythTubeWordmark height={26} /> : null}
+          {title ? (
+            <View style={{ marginLeft: logo ? 10 : 0, flex: 1 }}>
+              <Txt weight="bold" size={19} numberOfLines={1}>
                 {title}
               </Txt>
               {subtitle ? (
-                <Txt size={11} color={colors.textMuted} numberOfLines={1}>
+                <Txt size={11} color={colors.textMuted} numberOfLines={1} style={{ marginTop: 1 }}>
                   {subtitle}
                 </Txt>
               ) : null}
             </View>
-          ) : (
-            <View style={{ flex: 1 }}>
-              <Wordmark size={20} />
-            </View>
-          ))}
-        {showServerPill ? (
-          <LiveServerStatusPill onPress={onPressServerPill ?? (() => nav.navigate('ServersModal'))} />
-        ) : null}
-        {actions.length > 0 ? <HeaderActions actions={actions} onMenu={onMenu} searchScope={searchScope} /> : null}
+          ) : null}
+          {left}
+        </View>
+        <View style={styles.right}>
+          {right ?? (
+            <>
+              {displayServerPill ? <LiveServerStatusPill /> : null}
+              {actions ? (
+                <HeaderActions actions={actions} searchScope={searchScope} />
+              ) : !hideSearch ? (
+                <HeaderActions actions={['search']} searchScope={searchScope} />
+              ) : null}
+            </>
+          )}
+        </View>
       </View>
+      {children}
     </View>
   );
+
+  if (transparent) {
+    return <LinearGradient colors={GRADIENTS.topScrim}>{body}</LinearGradient>;
+  }
+  return <View style={{ backgroundColor: colors.bg }}>{body}</View>;
 }
 
 const styles = StyleSheet.create({
-  wrap: { zIndex: 10 },
+  wrap: { width: '100%' },
   bar: {
-    height: layout.headerHeight,
+    minHeight: layout.headerHeight,
+    paddingHorizontal: layout.gutter,
+    paddingVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: layout.gutter,
-    gap: 8,
+    justifyContent: 'space-between',
   },
-  back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
-  },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
-  },
+  left: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 8 },
+  right: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   serverPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface2,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radius.pill,
+    backgroundColor: 'rgba(19, 30, 48, 0.88)',
     borderWidth: 1,
-    borderColor: 'rgba(139,44,245,0.35)',
-    maxWidth: 185,
+    borderColor: 'rgba(0, 229, 176, 0.28)',
   },
-  sweepTrack: {
-    height: 2,
-    backgroundColor: colors.surface4,
-    borderRadius: 1,
-    marginTop: 3,
-    overflow: 'hidden',
+  latencyBadge: {
+    marginLeft: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: radius.xs,
+    backgroundColor: 'rgba(0, 229, 176, 0.14)',
   },
-  sweepFill: {
-    height: '100%',
-    backgroundColor: colors.cyan,
+  actionBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(19, 30, 48, 0.88)',
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

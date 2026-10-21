@@ -1,50 +1,47 @@
 {
   "expo": {
-    "name": "Ctent",
-    "slug": "ctent",
-    "version": "2.0.0",
+    "name": "MythTube",
+    "slug": "mythtube",
+    "version": "2.1.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
-    "scheme": "ctent",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#07060B",
+    "scheme": "mythtube",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060A10"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mythtube.app"
+    },
     "android": {
-      "package": "com.ctent.allinone",
-      "versionCode": 2,
+      "package": "com.mythtube.app",
+      "versionCode": 21,
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "backgroundColor": "#07060B",
+        "backgroundColor": "#060A10",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#07060B",
-          "image": "./assets/splash-icon.png",
-          "imageWidth": 140
-        }
-      ],
-      [
-        "expo-video",
-        {
-          "supportsBackgroundPlayback": false,
-          "supportsPictureInPicture": false
-        }
-      ],
+      "expo-font",
+      "expo-video",
       [
         "expo-build-properties",
         {
           "android": {
             "usesCleartextTraffic": true,
-            "enableMinifyInReleaseBuilds": true,
+            "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true,
-            "useLegacyPackaging": true,
-            "enablePngCrunchInReleaseBuilds": true,
-            "enableBundleCompression": true
+            "useLegacyPackaging": true
           }
         }
       ],

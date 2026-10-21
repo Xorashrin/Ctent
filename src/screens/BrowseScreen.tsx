@@ -259,9 +259,9 @@ export default function BrowseScreen({ navigation, route }: Props) {
                     styles.fileIcon,
                     {
                       backgroundColor: item.isDir
-                        ? 'rgba(61,220,255,0.14)'
+                        ? 'rgba(14, 165, 233, 0.14)'
                         : item.kind === 'VIDEO'
-                          ? 'rgba(226,28,240,0.16)'
+                          ? 'rgba(0, 229, 176, 0.16)'
                           : colors.surface2,
                     },
                   ]}
@@ -363,9 +363,9 @@ const styles = StyleSheet.create({
     height: 38,
     paddingHorizontal: 12,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(226,28,240,0.14)',
+    backgroundColor: 'rgba(0, 229, 176, 0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(226,28,240,0.45)',
+    borderColor: 'rgba(0, 229, 176, 0.42)',
     flexDirection: 'row',
     alignItems: 'center',
   },

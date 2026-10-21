@@ -187,11 +187,11 @@ export default function AppSettingsScreen({ navigation }: Props) {
         />
 
         <SectionLabel>About</SectionLabel>
-        <SettingRow icon="phone-portrait-outline" label="Version" value="Ctent 1.3.0 (All-in-One)" />
+        <SettingRow icon="phone-portrait-outline" label="Version" value="MythTube 2.1.0 (Aurora Edition)" />
         <SettingRow
           icon="server-outline"
-          label="Server & BDIX Manager"
-          description="Scan 1,470+ BDIX servers, CircleFTP, CyberFTP & anime portals."
+          label="Server, BDIX & IPTV Hub"
+          description="Scan 1,490+ BDIX servers, 27 anime portals & 28 Live IPTV playlists."
           onPress={() => navigation.navigate('Main', { screen: 'Servers' })}
         />
       </ScrollView>

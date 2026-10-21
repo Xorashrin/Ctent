@@ -1,7 +1,7 @@
-// Ctent Home Screen — reverse-engineered from app-release.apk (Lw8 HomeScreen).
+// MythTube Home Screen — Aurora Slate & Mint-Cyan Organizer
 // Features:
-// - Top Ctent bar with Wordmark + LiveServerStatusPill (pulsing online dot & sweep progress)
-// - 6 Ctent ChipSpec filters: All, Movies, TV Shows, Anime, Files, My List + Categories
+// - Top MythTube bar with Wordmark + LiveServerStatusPill (pulsing online dot & fastest latency)
+// - 6 ChipSpec filters: All, Movies, TV Shows, Anime, BDIX Files, My List + Genres
 // - HeroRotator spotlight carousel (6 auto-rotating titles with KenBurns drift & ExpandingDots)
 // - Direct BDIX Folder row (SectionStyle.FOLDER -> opens BrowseScreen)
 // - Multi-style catalog sections (POSTER, LANDSCAPE, TOP10) -> "Explore" opens CatalogScreen
@@ -151,7 +151,7 @@ export default function HomeScreen({ route, navigation }: Props) {
       list.push({
         key: 'mylist',
         kind: 'row',
-        title: 'Saved in My Ctent',
+        title: 'Saved in My Space',
         subtitle: 'Your personal watchlist',
         styleType: 'POSTER',
         items: myListItems,
@@ -197,7 +197,7 @@ export default function HomeScreen({ route, navigation }: Props) {
     }, [chip, genre, navigation]),
   );
 
-  const tint = hero?.tint ?? '#1B1432';
+  const tint = hero?.tint ?? '#091522';
 
   const renderItem = useCallback(
     ({ item }: { item: Section }) => {
@@ -214,7 +214,7 @@ export default function HomeScreen({ route, navigation }: Props) {
               onToggleList={(t) => {
                 const exists = profileData.myList.includes(t.id);
                 toggleMyList(t.id);
-                showToast(exists ? 'Removed from My Ctent' : 'Saved to My Ctent');
+                showToast(exists ? 'Removed from My Space' : 'Saved to My Space');
               }}
             />
           ) : (
@@ -299,14 +299,14 @@ export default function HomeScreen({ route, navigation }: Props) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={colors.magenta}
+            tintColor={colors.mint}
             progressViewOffset={headerTop + layout.chipRowHeight}
           />
         }
         ListFooterComponent={<SkeletonRow title="Discovering more streams…" />}
       />
 
-      {/* Top Glass Header + Ctent ChipSpec Bar */}
+      {/* Top Glass Header + MythTube ChipSpec Bar */}
       <View pointerEvents="box-none" style={[styles.header, { height: headerTop + layout.chipRowHeight }]}>
         <Animated.View
           pointerEvents="none"
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(139,44,245,0.20)',
+    borderBottomColor: 'rgba(0, 229, 176, 0.16)',
   },
   headerRow: {
     height: layout.headerHeight,

@@ -22,7 +22,7 @@ export type ServerType =
 
 export type ServerCategory = 'bdix' | 'anime';
 export type ProbePhase = 'IDLE' | 'QUICK_PROBE' | 'SWEEPING';
-export type ServerFilter = 'ALL' | 'ONLINE' | 'MEDIA' | 'NATIVE' | 'WEB' | 'BDIX' | 'ANIME';
+export type ServerFilter = 'ALL' | 'ONLINE' | 'MEDIA' | 'NATIVE' | 'WEB' | 'BDIX' | 'ANIME' | 'IPTV';
 
 export interface ManagedServer {
   id: string;
@@ -54,7 +54,7 @@ export interface ServerEngineState {
   ready: boolean;
 }
 
-const STORAGE_KEY = 'ctent:server_engine:v1';
+const STORAGE_KEY = 'mythtube:server_engine:v2';
 
 function inferInitialType(url: string, category: ServerCategory): { type: ServerType; meta: string } {
   if (category === 'anime') return { type: 'ANIME_WEB', meta: 'Anime Portal · HLS / DDL' };

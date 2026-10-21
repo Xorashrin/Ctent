@@ -11,6 +11,11 @@ import { Txt } from '../components/Txt';
 import { adultChannels, type Channel } from '../data/channels';
 import type { Title } from '../data/types';
 import { ADULT_ROWS, loadAdultPage, useRows } from '../services/catalog';
+import {
+  ADULT_LIVE_SOURCES,
+  fetchIptvPlaylistChannels,
+  getAdultDirectChannels,
+} from '../services/sources/iptvPlaylists';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, layout } from '../theme/tokens';
 
@@ -18,16 +23,18 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AdultContent'>;
 
 const AGE_GATE_KEY = 'mythtube:adult-confirmed-v1';
 
-/** 18+ section: live feeds plus an endlessly paged library from southfreak.in, behind a one-time age confirmation. */
+/** 18+ section: live feeds (AdultIPTV.net + M3U packs + iptv-org) plus an endlessly paged library from southfreak.in, behind a one-time age confirmation. */
 export default function AdultContentScreen({ navigation }: Props) {
   const { width } = useWindowDimensions();
   const [confirmed, setConfirmed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [items, setItems] = useState<Title[]>([]);
+  const [extraChannels, setExtraChannels] = useState<Channel[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const channels = useMemo(() => adultChannels(), []);
+  const baseChannels = useMemo(() => [...getAdultDirectChannels(), ...adultChannels()], []);
+  const channels = useMemo(() => [...baseChannels, ...extraChannels], [baseChannels, extraChannels]);
   const { rows } = useRows(ADULT_ROWS, confirmed);
   const cell = Math.floor((width - layout.gutter * 2 - 8 * 2) / 3);
 
@@ -37,6 +44,27 @@ export default function AdultContentScreen({ navigation }: Props) {
       .catch(() => undefined)
       .finally(() => setChecking(false));
   }, []);
+
+  useEffect(() => {
+    if (!confirmed) return;
+    let cancelled = false;
+    const m3uPacks = ADULT_LIVE_SOURCES.filter((s) => s.kind === 'playlist_m3u');
+    Promise.all(
+      m3uPacks.map((p) =>
+        fetchIptvPlaylistChannels(
+          { id: p.id, name: p.name, category: 'Global Aggregators', url: p.url, badge: '18+' },
+          30,
+        ),
+      ),
+    )
+      .then((lists) => {
+        if (!cancelled) setExtraChannels(lists.flat());
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [confirmed]);
 
   const more = useCallback(async () => {
     if (loading || done) return;
@@ -82,7 +110,7 @@ export default function AdultContentScreen({ navigation }: Props) {
               <Txt weight="bold" size={14}>Take me back</Txt>
             </Pressable>
             <Pressable style={[styles.btn, styles.btnSolid]} onPress={confirm}>
-              <Txt weight="bold" size={14} color={colors.bg}>I'm 18 or older</Txt>
+              <Txt weight="bold" size={14} color="#04120E">I'm 18 or older</Txt>
             </Pressable>
           </View>
         </View>
@@ -94,7 +122,7 @@ export default function AdultContentScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Adult Content" back />
+      <ScreenHeader title="18+ Adult Hub" subtitle={`${channels.length} Live Channels · SouthFreak Library`} back />
       <FlatList
         data={items}
         keyExtractor={(t) => t.id}
@@ -108,7 +136,7 @@ export default function AdultContentScreen({ navigation }: Props) {
         removeClippedSubviews
         ListHeaderComponent={
           <View style={{ paddingBottom: 8 }}>
-            {channels.length > 0 ? <ChannelRow title="🔴 Live Channels" items={channels} onPressChannel={openChannel} /> : null}
+            {channels.length > 0 ? <ChannelRow title="🔴 AdultIPTV & Live 18+ Channels" items={channels} onPressChannel={openChannel} /> : null}
             {rows.map((r) =>
               r.items.length === 0 ? (
                 r.loading ? <SkeletonRow key={r.def.key} title={r.def.title} /> : null
@@ -121,7 +149,7 @@ export default function AdultContentScreen({ navigation }: Props) {
             </View>
           </View>
         }
-        ListFooterComponent={loading ? <ActivityIndicator color={colors.text} style={{ padding: 20 }} /> : undefined}
+        ListFooterComponent={loading ? <ActivityIndicator color={colors.mint} style={{ padding: 20 }} /> : undefined}
         renderItem={({ item }) => (
           <View style={{ width: cell }}>
             <Poster title={item} width={cell} height={Math.round(cell * 1.45)} onPress={(t) => navigation.navigate('Title', { id: t.id })} />
@@ -136,9 +164,9 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   gateRoot: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   gateButtons: { flexDirection: 'row', gap: 12, marginTop: 28 },
-  btn: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 8, minWidth: 130, alignItems: 'center' },
-  btnOutline: { borderWidth: 1, borderColor: colors.text },
-  btnSolid: { backgroundColor: colors.text },
+  btn: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 10, minWidth: 130, alignItems: 'center' },
+  btnOutline: { borderWidth: 1, borderColor: colors.borderStrong },
+  btnSolid: { backgroundColor: colors.mint },
   header: { paddingHorizontal: layout.gutter, paddingTop: 24, paddingBottom: 8 },
   grid: { paddingBottom: 30, gap: 8 },
   row: { gap: 8, paddingHorizontal: layout.gutter },

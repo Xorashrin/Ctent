@@ -520,13 +520,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(226,28,240,0.12)',
+    backgroundColor: 'rgba(0, 229, 176, 0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(226,28,240,0.4)',
+    borderColor: 'rgba(0, 229, 176, 0.42)',
   },
   groupToggleActive: {
-    backgroundColor: 'rgba(61,220,255,0.14)',
-    borderColor: 'rgba(61,220,255,0.45)',
+    backgroundColor: 'rgba(14, 165, 233, 0.14)',
+    borderColor: 'rgba(14, 165, 233, 0.45)',
   },
   searchBox: {
     flexDirection: 'row',
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: colors.surface1,
     borderWidth: 1,
-    borderColor: 'rgba(139,44,245,0.35)',
+    borderColor: 'rgba(0, 229, 176, 0.32)',
   },
   input: {
     flex: 1,

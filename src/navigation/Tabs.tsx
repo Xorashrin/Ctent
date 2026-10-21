@@ -1,14 +1,14 @@
-// Ctent 5-Tab Bottom Navigation — reverse-engineered from app-release.apk (Lu8 TabItem):
-// 1. Home (home)
-// 2. Anime (sparkles / AutoAwesome)
-// 3. Search (search)
-// 4. Servers (server-network / Dns)
-// 5. My Ctent (library / VideoLibrary)
+// MythTube 5-Tab Navigation Bar — Smooth spring icon bounce & glowing Aurora Mint top indicator:
+// 1. Home (Movies, Series, BDIX & Live Hub)
+// 2. Anime (Anime & Donghua Hub)
+// 3. Search (Cross-Server Ranked & By-Server Search)
+// 4. Servers (BDIX Pool, Live IPTV Playlists & Directory Browser)
+// 5. My MythTube (Watchlist, Downloads, Continue Watching & Settings)
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 
 import { CreditPopup } from '../components/CreditPopup';
 import AnimeScreen from '../screens/AnimeScreen';
@@ -21,17 +21,64 @@ import { colors, font, layout } from '../theme/tokens';
 import type { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+function AnimatedIonTabIcon({
+  focused,
+  color,
+  activeIcon,
+  inactiveIcon,
+}: {
+  focused: boolean;
+  color: string;
+  activeIcon: IoniconName;
+  inactiveIcon: IoniconName;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.spring(scale, {
+      toValue: focused ? 1.12 : 1,
+      speed: 24,
+      bounciness: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [focused, scale]);
+
+  return (
+    <View style={styles.tabIconWrap}>
+      {focused ? <View style={styles.activeBar} /> : null}
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Ionicons name={focused ? activeIcon : inactiveIcon} size={21} color={color} />
+      </Animated.View>
+    </View>
+  );
+}
 
 function ServerTabIcon({ focused, color }: { focused: boolean; color: string }) {
   const { state } = useServerEngine();
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.spring(scale, {
+      toValue: focused ? 1.12 : 1,
+      speed: 24,
+      bounciness: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [focused, scale]);
+
   return (
-    <View>
-      <MaterialCommunityIcons
-        name={focused ? 'server-network' : 'server-network-off'}
-        size={23}
-        color={color}
-      />
-      {state.onlineCount > 0 ? <View style={styles.onlineBadge} /> : null}
+    <View style={styles.tabIconWrap}>
+      {focused ? <View style={styles.activeBar} /> : null}
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <MaterialCommunityIcons
+          name={focused ? 'server-network' : 'server-network-off'}
+          size={22}
+          color={color}
+        />
+        {state.onlineCount > 0 ? <View style={styles.onlineBadge} /> : null}
+      </Animated.View>
     </View>
   );
 }
@@ -44,17 +91,17 @@ export function Tabs() {
           headerShown: false,
           lazy: true,
           freezeOnBlur: true,
-          tabBarActiveTintColor: colors.magenta,
+          tabBarActiveTintColor: colors.mint,
           tabBarInactiveTintColor: colors.textDim,
           tabBarStyle: {
-            backgroundColor: 'rgba(12,10,18,0.96)',
+            backgroundColor: 'rgba(9, 15, 24, 0.97)',
             borderTopWidth: StyleSheet.hairlineWidth,
-            borderTopColor: 'rgba(139,44,245,0.28)',
+            borderTopColor: 'rgba(0, 229, 176, 0.22)',
             height: layout.tabBarHeight,
             paddingTop: 4,
             elevation: 0,
           },
-          tabBarLabelStyle: { fontFamily: font.medium, fontSize: 10, marginBottom: 4 },
+          tabBarLabelStyle: { fontFamily: font.medium, fontSize: 10, marginBottom: 5 },
           sceneStyle: { backgroundColor: colors.bg },
         }}
       >
@@ -64,7 +111,12 @@ export function Tabs() {
           options={{
             title: 'Home',
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+              <AnimatedIonTabIcon
+                focused={focused}
+                color={color}
+                activeIcon="home"
+                inactiveIcon="home-outline"
+              />
             ),
           }}
         />
@@ -74,7 +126,12 @@ export function Tabs() {
           options={{
             title: 'Anime',
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={22} color={color} />
+              <AnimatedIonTabIcon
+                focused={focused}
+                color={color}
+                activeIcon="sparkles"
+                inactiveIcon="sparkles-outline"
+              />
             ),
           }}
         />
@@ -84,7 +141,12 @@ export function Tabs() {
           options={{
             title: 'Search',
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons name={focused ? 'search' : 'search-outline'} size={22} color={color} />
+              <AnimatedIonTabIcon
+                focused={focused}
+                color={color}
+                activeIcon="search"
+                inactiveIcon="search-outline"
+              />
             ),
           }}
         />
@@ -100,9 +162,14 @@ export function Tabs() {
           name="MyNetflix"
           component={MyNetflixScreen}
           options={{
-            title: 'My Ctent',
+            title: 'My Space',
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons name={focused ? 'library' : 'library-outline'} size={22} color={color} />
+              <AnimatedIonTabIcon
+                focused={focused}
+                color={color}
+                activeIcon="library"
+                inactiveIcon="library-outline"
+              />
             ),
           }}
         />
@@ -113,6 +180,20 @@ export function Tabs() {
 }
 
 const styles = StyleSheet.create({
+  tabIconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 48,
+    height: 28,
+  },
+  activeBar: {
+    position: 'absolute',
+    top: -6,
+    width: 20,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: colors.mint,
+  },
   onlineBadge: {
     position: 'absolute',
     top: -1,
@@ -120,8 +201,8 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: colors.online,
+    backgroundColor: colors.mint,
     borderWidth: 1,
-    borderColor: colors.surface1,
+    borderColor: colors.surface0,
   },
 });

@@ -1,6 +1,6 @@
 {
-  "name": "ctent",
-  "version": "2.0.0",
+  "name": "mythtube",
+  "version": "2.1.0",
   "main": "index.ts",
   "private": true,
   "scripts": {

@@ -10,9 +10,28 @@ export interface Addon {
   nsfw: boolean;
 }
 
-/** Verified live 2026-10-21. */
+/** Verified live 2026-10-21 (03-MOVIES-TV-SOURCES.md & ALL_SOURCES_MASTER.md). */
 export const ONLYPORN: Addon = { id: 'onlyporn', name: 'OnlyPorn', base: 'https://07b88951aaab-jaxxx-v2.baby-beamup.club', nsfw: true };
 export const STREMIFY: Addon = { id: 'stremify', name: 'Stremify', base: 'https://stremify.hayd.uk', nsfw: false };
+export const NODEBRID: Addon = { id: 'nodebrid', name: 'NoDebrid HTTP', base: 'https://nodebrid.fly.dev', nsfw: false };
+export const ANIME_KITSU: Addon = { id: 'kitsu', name: 'Anime Kitsu', base: 'https://anime-kitsu.strem.fun', nsfw: false };
+export const MEDIAFUSION: Addon = { id: 'mediafusion', name: 'MediaFusion', base: 'https://mediafusion.elfhosted.com', nsfw: false };
+export const COMET: Addon = { id: 'comet', name: 'Comet', base: 'https://comet.elfhosted.com', nsfw: false };
+export const AIOSTREAMS: Addon = { id: 'aiostreams', name: 'AIOStreams', base: 'https://aiostreams.elfhosted.com', nsfw: false };
+export const TORRENTIO_LITE: Addon = { id: 'torrentio_lite', name: 'Torrentio Lite', base: 'https://torrentio.strem.fun/lite', nsfw: false };
+export const TPB_PLUS: Addon = { id: 'tpb_plus', name: 'ThePirateBay+', base: 'https://thepiratebay-plus.strem.fun', nsfw: false };
+
+export const ALL_STREMIO_ADDONS: Addon[] = [
+  STREMIFY,
+  NODEBRID,
+  ANIME_KITSU,
+  MEDIAFUSION,
+  COMET,
+  AIOSTREAMS,
+  TORRENTIO_LITE,
+  TPB_PLUS,
+  ONLYPORN,
+];
 
 export const ONLYPORN_CATALOGS: { id: string; name: string }[] = [
   { id: 'eporner', name: 'Eporner' },
@@ -80,5 +99,5 @@ export async function streams(addon: Addon, type: 'movie' | 'series', id: string
 }
 
 export function findAddon(id?: string): Addon | undefined {
-  return [ONLYPORN, STREMIFY].find((a) => a.id === id);
+  return ALL_STREMIO_ADDONS.find((a) => a.id === id);
 }

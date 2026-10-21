@@ -5,37 +5,40 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
-  group: android-${{ github.ref }}
+  group: android-apk-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
+    name: Build MythTube.apk
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    permissions:
-      contents: write
+    timeout-minutes: 45
+
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
 
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
+          cache: gradle
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Align native module versions with the Expo SDK
         run: npx expo install --fix
 
       - name: Shrink icon fonts to the glyphs in use
-        continue-on-error: true
         run: |
           pip install --quiet fonttools
           python3 tools/subset_icon_fonts.py
@@ -48,30 +51,36 @@ jobs:
 
       - name: Build release APK (arm64-v8a + armeabi-v7a in one file)
         working-directory: android
+        env:
+          ORG_GRADLE_PROJECT_reactNativeArchitectures: armeabi-v7a,arm64-v8a
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         run: ./gradlew assembleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a --no-daemon
 
       - name: Collect and verify the APK
         run: |
           mkdir -p dist
           APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
-          cp "$APK" dist/Ctent.apk
+          cp "$APK" dist/MythTube.apk
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
-          "$APKSIGNER" verify --verbose dist/Ctent.apk
-          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
-          "$AAPT" dump badging dist/Ctent.apk | grep -E "package:|sdkVersion|native-code"
-          ls -lh dist/Ctent.apk
+          "$APKSIGNER" verify --verbose dist/MythTube.apk
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -n 1)"
+          "$AAPT2" dump badging dist/MythTube.apk | head -n 5
+          ls -lh dist/MythTube.apk
 
       - uses: actions/upload-artifact@v5
         with:
-          name: Ctent-apk
-          path: dist/Ctent.apk
+          name: MythTube-apk
+          path: dist/MythTube.apk
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Publish release
+        if: github.ref == 'refs/heads/main'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="v2.0.${{ github.run_number }}"
-          gh release create "$TAG" dist/Ctent.apk \
+          TAG="v2.1.${{ github.run_number }}"
+          gh release create "$TAG" dist/MythTube.apk \
             --repo "${{ github.repository }}" \
-            --title "Ctent - All in One $TAG" \
-            --notes "Ctent All-in-One BDIX, Anime & Global Streaming APK (arm64-v8a + armeabi-v7a). Built from ${{ github.sha }}."
+            --title "MythTube $TAG" \
+            --notes "MythTube Aurora Edition APK (arm64-v8a + armeabi-v7a). Built from ${{ github.sha }}."

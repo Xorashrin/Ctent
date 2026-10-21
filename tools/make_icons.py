@@ -1,4 +1,4 @@
-"""Generate Ctent app icons (Cosmic Violet & Neon Magenta 'C' Play Prism mark) as compact PNGs.
+"""Generate MythTube Aurora app icons (Aurora Mint & Glacier Cyan 'M' Prism mark) as compact PNGs.
 
 Usage: python3 -I tools/make_icons.py assets
 """
@@ -7,17 +7,15 @@ import struct
 import sys
 import zlib
 
-# Geometry on a 1024 canvas: C-arc outer polygon + inner play triangle
-OUTER_ARC = [
-    (680, 210), (420, 210), (220, 390), (220, 634), (420, 814), (680, 814),
-    (680, 694), (465, 694), (345, 584), (345, 440), (465, 330), (680, 330)
-]
-PLAY_TRI = [
-    (475, 395), (765, 512), (475, 629)
-]
+# Geometry on a 1024 canvas: MythTube 'M' geometric wings + center prism
+LEFT_PILLAR = [(210, 210), (345, 210), (345, 814), (210, 814)]
+RIGHT_PILLAR = [(679, 210), (814, 210), (814, 814), (679, 814)]
+LEFT_WING = [(210, 210), (345, 210), (512, 540), (512, 690)]
+RIGHT_WING = [(814, 210), (679, 210), (512, 540), (512, 690)]
 
-ARC_RGB = (0x8B, 0x2C, 0xF5)   # Electric Violet (#8B2CF5)
-PLAY_RGB = (0xFF, 0x2D, 0x95)  # Cyber Pink (#FF2D95)
+MINT_RGB = (0x00, 0xE5, 0xB0)   # Aurora Mint (#00E5B0)
+CYAN_RGB = (0x0E, 0xA5, 0xE9)   # Glacier Cyan (#0EA5E9)
+SAPPHIRE_RGB = (0x3B, 0x82, 0xF6)  # Royal Sapphire (#3B82F6)
 
 
 def fill_polygon(mask, size, poly, scale, offset):
@@ -43,7 +41,12 @@ def render(size, mark_fraction, bg, mono=False):
     scale = big * mark_fraction / 1024.0
     offset = (big - 1024 * scale) / 2.0
     layers = []
-    for poly, rgb in ((OUTER_ARC, ARC_RGB), (PLAY_TRI, PLAY_RGB)):
+    for poly, rgb in (
+        (LEFT_PILLAR, SAPPHIRE_RGB),
+        (RIGHT_PILLAR, SAPPHIRE_RGB),
+        (RIGHT_WING, CYAN_RGB),
+        (LEFT_WING, MINT_RGB),
+    ):
         mask = bytearray(big * big)
         fill_polygon(mask, big, poly, scale, offset)
         layers.append((mask, (255, 255, 255) if mono else rgb))
@@ -78,15 +81,15 @@ def write_png(path, size, rgba):
 
 
 def main(out_dir):
-    cosmic_bg = (0x07, 0x06, 0x0B, 255)
+    slate_bg = (0x06, 0x0A, 0x10, 255)
     clear = (0, 0, 0, 0)
     jobs = [
-        ("icon.png", 512, 0.78, cosmic_bg, False),
+        ("icon.png", 512, 0.78, slate_bg, False),
         ("splash-icon.png", 384, 0.9, clear, False),
         ("android-icon-foreground.png", 432, 0.56, clear, False),
-        ("android-icon-background.png", 256, 0.0, cosmic_bg, False),
+        ("android-icon-background.png", 256, 0.0, slate_bg, False),
         ("android-icon-monochrome.png", 432, 0.6, clear, True),
-        ("favicon.png", 48, 0.85, cosmic_bg, False),
+        ("favicon.png", 48, 0.85, slate_bg, False),
     ]
     for name, size, frac, bg, mono in jobs:
         write_png(os.path.join(out_dir, name), size, render(size, frac, bg, mono))

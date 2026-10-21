@@ -16,6 +16,17 @@ export interface Channel {
 export const CHANNELS = raw as Channel[];
 const MAP = new Map(CHANNELS.map((c) => [c.id, c]));
 
+export function registerChannels(extra: Channel[]): void {
+  for (const ch of extra) {
+    if (!MAP.has(ch.id)) {
+      MAP.set(ch.id, ch);
+      CHANNELS.push(ch);
+    } else {
+      MAP.set(ch.id, ch);
+    }
+  }
+}
+
 export function getChannel(id: string): Channel | undefined {
   return MAP.get(id);
 }

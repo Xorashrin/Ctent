@@ -12,11 +12,13 @@ import { cached } from './cache';
 import { mergeAcrossServers } from './organizer';
 import * as amaderftp from './sources/amaderftp';
 import * as anilist from './sources/anilist';
+import * as archiveOrg from './sources/archiveOrg';
 import * as bdix from './sources/bdix';
 import * as cinemeta from './sources/cinemeta';
 import * as circleftp from './sources/circleftp';
 import * as cyberftp from './sources/cyberftp';
 import * as stremio from './sources/stremio';
+import * as vodM3u from './sources/vodM3u';
 import { CATEGORY, listPosts, SOUTHFREAK, SOUTHFREAK_18 } from './sources/wordpress';
 
 const NEW_WINDOW = 72 * 3600 * 1000;
@@ -123,7 +125,9 @@ export function loadDetail(id: string): Promise<Title> {
                 ? await circleftp.detail(base)
                 : base.source === 'cyberftp'
                   ? await cyberftp.detail(base)
-                  : { ...base, detailed: true };
+                  : base.source === 'archive'
+                    ? await archiveOrg.archiveOrgDetail(base)
+                    : { ...base, detailed: true };
       return register([fresh])[0];
     } catch {
       return base;
@@ -255,6 +259,20 @@ export const HOME_ROWS: RowDef[] = [
     title: 'Animated Features',
     style: 'POSTER',
     load: wp('animation', CATEGORY.animation),
+  },
+  {
+    key: 'vod-m3u',
+    title: 'Direct VOD & M3U Cinema',
+    subtitle: 'Instant play · TMDB Top Movies, Series & Zaman BDIX VOD',
+    style: 'POSTER',
+    load: feed('vod:m3u', () => vodM3u.vodM3uFeatured(36)),
+  },
+  {
+    key: 'archive-pd',
+    title: 'Internet Archive Feature Films',
+    subtitle: 'Full-length Public Domain MP4/MKV · Stream & Download',
+    style: 'POSTER',
+    load: feed('archive:featured', () => archiveOrg.archiveOrgFeatured(28), 6 * 3600 * 1000),
   },
 ];
 
@@ -547,6 +565,8 @@ async function searchOnce(query: string, includeAdult: boolean): Promise<Title[]
     listPosts(SOUTHFREAK, { search: query, perPage: 15 }),
     cinemeta.search(query),
     anilist.search(query),
+    vodM3u.vodM3uSearch(query),
+    archiveOrg.archiveOrgSearch(query, 12),
   ];
   if (includeAdult) {
     jobs.push(listPosts(SOUTHFREAK_18, { search: query, perPage: 15 }));

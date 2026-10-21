@@ -6,7 +6,7 @@ import type { Channel } from '../data/channels';
 import { colors } from '../theme/tokens';
 import { Txt } from './Txt';
 
-const TINTS = ['#3B1CFF', '#8B2CF5', '#E21CF0', '#FF2D95', '#22D37A', '#FFC53D', '#3DDCFF'];
+const TINTS = ['#00E5B0', '#0EA5E9', '#3B82F6', '#F59E0B', '#10B981', '#06B6D4', '#6366F1'];
 
 function initials(name: string): string {
   const words = name.split(/[\s\-_.]+/).filter((w) => /^[A-Za-z0-9]/.test(w));

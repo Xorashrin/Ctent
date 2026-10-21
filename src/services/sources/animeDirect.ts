@@ -197,7 +197,52 @@ export async function searchKickassAnime(titleName: string, episodeNumber = 1): 
 }
 
 /**
- * Unified direct anime stream gatherer combining Tokyo Insider, AniZone, and KickassAnime.
+ * 4. AniSpace Cloudflare Worker API (04-ANIME-SOURCES.md & 11-VERIFIED-100-PERCENT.md):
+ * Queries https://api.anispace.workers.dev/search/{q} -> /episode/{id} for direct HLS/MP4 streams.
+ */
+export async function searchAniSpace(titleName: string, episodeNumber = 1): Promise<DirectAnimeStream[]> {
+  try {
+    const q = encodeURIComponent(titleName.trim());
+    const searchRes = await withTimeout(
+      getJson<{ results?: { id?: string; title?: string }[] }>(
+        `https://api.anispace.workers.dev/search/${q}`,
+        { timeout: 6500, retries: 0 },
+      ),
+      7000,
+      'AniSpace search',
+    );
+    const first = searchRes?.results?.[0];
+    if (!first?.id) return [];
+    const epId = `${first.id}-episode-${episodeNumber}`;
+    const epRes = await withTimeout(
+      getJson<{ sources?: { url?: string; quality?: string; isM3U8?: boolean }[] }>(
+        `https://api.anispace.workers.dev/episode/${encodeURIComponent(epId)}`,
+        { timeout: 6500, retries: 0 },
+      ),
+      7000,
+      'AniSpace episode',
+    );
+    const out: DirectAnimeStream[] = [];
+    for (const s of epRes?.sources ?? []) {
+      if (s.url && /^https?:\/\//i.test(s.url)) {
+        out.push({
+          id: `anispace:${s.url}`,
+          provider: 'AniSpace Worker',
+          url: s.url,
+          quality: (s.quality ?? '1080P').toUpperCase(),
+          label: `${titleName} • Ep ${episodeNumber} (AniSpace)`,
+          hls: Boolean(s.isM3U8 || /\.m3u8/i.test(s.url)),
+        });
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Unified direct anime stream gatherer combining Tokyo Insider, AniZone, KickassAnime, and AniSpace.
  */
 export async function gatherDirectAnimeStreams(
   titleName: string,
@@ -208,6 +253,7 @@ export async function gatherDirectAnimeStreams(
     searchTokyoInsider(titleName, episodeNumber, isMovie),
     searchAniZone(titleName, episodeNumber),
     searchKickassAnime(titleName, episodeNumber),
+    searchAniSpace(titleName, episodeNumber),
   ]);
   return settled.flatMap((r) => (r.status === 'fulfilled' ? r.value : []));
 }

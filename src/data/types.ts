@@ -13,6 +13,8 @@ export type SourceId =
   | 'cyberftp'
   | 'bdix'
   | 'animedirect'
+  | 'archive'
+  | 'vodm3u'
   | 'stremio'
   | 'cinemeta'
   | 'anilist';
@@ -99,7 +101,7 @@ export interface Profile {
 }
 
 export const MAIN_PROFILE_ID = 'main';
-export const PROFILE_COLOR = '#8B2CF5';
+export const PROFILE_COLOR = '#00E5B0';
 
 export const GENRES = [
   'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family',
@@ -121,7 +123,7 @@ export function nextEpisode(title: Title, episodeId: string): Episode | null {
   return i >= 0 && i + 1 < all.length ? all[i + 1] : null;
 }
 
-const TINTS = ['#22123E', '#142E3D', '#2D1436', '#162447', '#3B1832', '#12352B', '#2E1A47', '#1B2A4A', '#34163E', '#1B2E35'];
+const TINTS = ['#0D1F2D', '#0E2438', '#112A3E', '#14263B', '#0F292E', '#17253B', '#122234', '#0C1E2C', '#102536', '#0E2231'];
 
 export function tintFor(seed: string): string {
   let h = 2166136261;
@@ -147,6 +149,10 @@ export function sourceBadgeName(source: SourceId, custom?: string): string {
       return 'Southfreak';
     case 'animedirect':
       return 'Anime Direct';
+    case 'archive':
+      return 'Archive PD';
+    case 'vodm3u':
+      return 'Direct VOD';
     case 'anilist':
       return 'AniList';
     case 'cinemeta':

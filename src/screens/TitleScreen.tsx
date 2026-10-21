@@ -316,12 +316,12 @@ export default function TitleScreen({ navigation, route }: Props) {
 
           <View style={styles.actions}>
             <IconAction
-              label={inList ? 'In My Ctent' : 'My Ctent'}
+              label={inList ? 'In My Space' : 'My Space'}
               icon={inList ? 'bookmark-check' : 'bookmark-plus-outline'}
               active={inList}
               onPress={() => {
                 toggleMyList(title.id);
-                showToast(inList ? 'Removed from My Ctent' : 'Saved to My Ctent');
+                showToast(inList ? 'Removed from My Space' : 'Saved to My Space');
               }}
             />
             <View>
@@ -353,7 +353,7 @@ export default function TitleScreen({ navigation, route }: Props) {
             <IconAction
               label="Share"
               icon="share-variant-outline"
-              onPress={() => Share.share({ message: `Watch "${title.name}" on Ctent` }).catch(() => undefined)}
+              onPress={() => Share.share({ message: `Watch "${title.name}" on MythTube` }).catch(() => undefined)}
             />
           </View>
         </View>
@@ -469,7 +469,7 @@ export default function TitleScreen({ navigation, route }: Props) {
                         <View
                           style={[
                             styles.serverIconWrap,
-                            { backgroundColor: idx === 0 ? 'rgba(34,211,122,0.16)' : 'rgba(139,44,245,0.16)' },
+                            { backgroundColor: idx === 0 ? 'rgba(0, 229, 176, 0.16)' : 'rgba(14, 165, 233, 0.16)' },
                           ]}
                         >
                           <MaterialCommunityIcons
@@ -560,8 +560,8 @@ const styles = StyleSheet.create({
   },
   qualityChip: {
     borderWidth: 1,
-    borderColor: 'rgba(226,28,240,0.45)',
-    backgroundColor: 'rgba(226,28,240,0.12)',
+    borderColor: 'rgba(0, 229, 176, 0.42)',
+    backgroundColor: 'rgba(0, 229, 176, 0.12)',
     borderRadius: radius.xs,
     paddingHorizontal: 6,
     paddingVertical: 1,
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'rgba(139,44,245,0.88)',
+    backgroundColor: 'rgba(0, 229, 176, 0.88)',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1482,78 +1482,48 @@ export interface ActivePoolEntry {
 }
 
 export const ACTIVE_POOL_SERVERS: ActivePoolEntry[] = [
-  {
-    "id": "bdix_59",
-    "url": "http://10.100.100.12",
-    "latency": 81,
-    "online": true
-  },
-  {
-    "id": "bdix_60",
-    "url": "http://10.100.100.13",
-    "latency": 81,
-    "online": true
-  },
-  {
-    "id": "bdix_40",
-    "url": "http://172.16.50.7",
-    "latency": 88,
-    "online": true
-  },
-  {
-    "id": "bdix_1",
-    "url": "http://172.16.50.4",
-    "latency": 160,
-    "online": true
-  },
-  {
-    "id": "bdix_2",
-    "url": "https://local.cyberftp.net",
-    "latency": 215,
-    "online": true
-  },
-  {
-    "id": "bdix_33",
-    "url": "http://new.circleftp.net",
-    "latency": 535,
-    "online": true
-  },
-  {
-    "id": "bdix_17",
-    "url": "http://www.bnet-bd.com",
-    "latency": 561,
-    "online": true
-  },
-  {
-    "id": "bdix_96",
-    "url": "http://103.91.144.230",
-    "latency": 575,
-    "online": true
-  },
-  {
-    "id": "bdix_35",
-    "url": "http://ftp4.circleftp.net",
-    "latency": 614,
-    "online": true
-  },
-  {
-    "id": "bdix_48",
-    "url": "https://www.discoverynetbd.com",
-    "latency": 688,
-    "online": true
-  },
-  {
-    "id": "bdix_54",
-    "url": "http://www.onesky.com.bd",
-    "latency": 737,
-    "online": true
-  },
-  {
-    "id": "bdix_56",
-    "url": "http://10.100.100.10",
-    "latency": 940,
-    "online": true
-  }
+  { id: 'bdix_59', url: 'http://10.100.100.12', latency: 81, online: true },
+  { id: 'bdix_60', url: 'http://10.100.100.13', latency: 81, online: true },
+  { id: 'bdix_40', url: 'http://172.16.50.7', latency: 88, online: true },
+  { id: 'bdix_1', url: 'http://172.16.50.4', latency: 160, online: true },
+  { id: 'bdix_dhaka12', url: 'http://172.16.50.12', latency: 92, online: true },
+  { id: 'bdix_dhaka14', url: 'http://172.16.50.14', latency: 95, online: true },
+  { id: 'bdix_icc', url: 'http://10.16.100.244', latency: 74, online: true },
+  { id: 'bdix_2', url: 'https://local.cyberftp.net', latency: 215, online: true },
+  { id: 'bdix_33', url: 'http://new.circleftp.net', latency: 535, online: true },
+  { id: 'bdix_index2', url: 'http://index2.circleftp.net', latency: 410, online: true },
+  { id: 'bdix_amader', url: 'http://amaderftp.net', latency: 320, online: true },
+  { id: 'bdix_ftpbd', url: 'https://ftpbd.net', latency: 390, online: true },
+  { id: 'bdix_ftpbd_media', url: 'http://media.ftpbd.net', latency: 380, online: true },
+  { id: 'bdix_bnet8', url: 'http://103.58.73.8', latency: 298, online: true },
+  { id: 'bdix_bnet6', url: 'http://103.58.73.6', latency: 310, online: true },
+  { id: 'bdix_bnet7', url: 'http://103.58.73.7', latency: 315, online: true },
+  { id: 'bdix_bnet9', url: 'http://103.58.73.9', latency: 320, online: true },
+  { id: 'bdix_samftp', url: 'https://samftp.com', latency: 240, online: true },
+  { id: 'bdix_discovery', url: 'http://movies.discoveryftp.net', latency: 260, online: true },
+  { id: 'bdix_khulna', url: 'http://khulnaflix.net', latency: 209, online: true },
+  { id: 'bdix_natural', url: 'http://www.naturalbd.com', latency: 280, online: true },
+  { id: 'bdix_ctgmovies', url: 'http://ctgmovies.com', latency: 270, online: true },
+  { id: 'bdix_ctgflix', url: 'http://www.ctgflix.com', latency: 275, online: true },
+  { id: 'bdix_showtime', url: 'http://showtimebd.com', latency: 290, online: true },
+  { id: 'bdix_dflix', url: 'http://fs1.dflix.live', latency: 195, online: true },
+  { id: 'bdix_timepass', url: 'http://www.timepassbd.live', latency: 231, online: true },
+  { id: 'bdix_ihub', url: 'http://ihub.live', latency: 220, online: true },
+  { id: 'bdix_moviehaat', url: 'http://moviehaat.net', latency: 250, online: true },
+  { id: 'bdix_ebox', url: 'http://fileserver.ebox.live', latency: 265, online: true },
+  { id: 'bdix_sunplex', url: 'https://sunplex.net', latency: 340, online: true },
+  { id: 'bdix_pollybd', url: 'https://pollybd.com', latency: 350, online: true },
+  { id: 'bdix_abibd', url: 'https://abibd.com', latency: 420, online: true },
+  { id: 'bdix_dnet', url: 'https://dnetdrive.com', latency: 290, online: true },
+  { id: 'bdix_netonline', url: 'https://www.netonlinebd.com', latency: 310, online: true },
+  { id: 'bdix_friends', url: 'https://www.friendsonlinebd.com', latency: 330, online: true },
+  { id: 'bdix_citycom', url: 'https://citycomnetwork.com.bd', latency: 345, online: true },
+  { id: 'bdix_17', url: 'http://www.bnet-bd.com', latency: 561, online: true },
+  { id: 'bdix_96', url: 'http://103.91.144.230', latency: 575, online: true },
+  { id: 'bdix_35', url: 'http://ftp4.circleftp.net', latency: 614, online: true },
+  { id: 'bdix_48', url: 'https://www.discoverynetbd.com', latency: 688, online: true },
+  { id: 'bdix_54', url: 'http://www.onesky.com.bd', latency: 737, online: true },
+  { id: 'bdix_56', url: 'http://10.100.100.10', latency: 940, online: true },
 ];
 
 export interface WotakuAnimeServer {
@@ -1699,5 +1669,61 @@ export const WOTAKU_ANIME_SERVERS: WotakuAnimeServer[] = [
     "url": "https://lama.watch",
     "category": "anime",
     "source": "Wotaku Wiki"
+  },
+  {
+    "id": "anime_anispace",
+    "name": "AniSpace API",
+    "url": "https://api.anispace.workers.dev/home",
+    "category": "anime",
+    "source": "Cloudflare Worker"
+  },
+  {
+    "id": "anime_hianime",
+    "name": "HiAnime",
+    "url": "https://hianime.to",
+    "category": "anime",
+    "source": "Tier-1 Anime"
+  },
+  {
+    "id": "anime_animekai",
+    "name": "AnimeKai",
+    "url": "https://animekai.to",
+    "category": "anime",
+    "source": "Tier-1 Anime"
+  },
+  {
+    "id": "anime_allanime",
+    "name": "AllAnime",
+    "url": "https://allanime.day",
+    "category": "anime",
+    "source": "Tier-1 Anime"
+  },
+  {
+    "id": "anime_anikoto",
+    "name": "AnikotoTV",
+    "url": "https://anikoto.tv",
+    "category": "anime",
+    "source": "Tier-1 Anime"
+  },
+  {
+    "id": "anime_animetsu",
+    "name": "Animetsu",
+    "url": "https://animetsu.cc",
+    "category": "anime",
+    "source": "Tier-1 Anime"
+  },
+  {
+    "id": "anime_toonhub",
+    "name": "ToonHub Cartoons",
+    "url": "https://toonhub4u.co",
+    "category": "anime",
+    "source": "Animation & Cartoons"
+  },
+  {
+    "id": "anime_topcartoons",
+    "name": "TopCartoons",
+    "url": "https://www.topcartoons.tv",
+    "category": "anime",
+    "source": "Animation & Cartoons"
   }
 ];

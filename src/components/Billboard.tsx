@@ -1,292 +1,290 @@
-// Ctent HeroRotator / Spotlight Carousel — reverse-engineered from app-release.apk (Lw8 & Lm8/m HeroRotator).
-// Features:
-// - Auto-rotating spotlight items (every 6.5s) with KenBurnsBackdrop drift animation
-// - Server badge, quality tag, ★ rating, genre pills
-// - Neon violet-to-magenta gradient Play CTA + Glass Details & Watchlist buttons
-// - ExpandingDots pagination indicator (dotW)
+// MythTube Aurora Hero Rotator — Clean, breathable featured banner:
+// - Auto-advances every 5.5s with smooth crossfade + vertical slide
+// - KenBurnsBackdrop subtle zoom + pan
+// - Aurora Mint -> Glacier Cyan "Watch Now" pill CTA + "Details" + "+ My List"
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from './Img';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { memo, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 
-import { sourceBadgeName, type Title } from '../data/types';
+import type { Title } from '../data/types';
+import { inMyList, useApp } from '../state/AppState';
 import { colors, GRADIENTS, layout, radius } from '../theme/tokens';
-import { ExpandingDots, KenBurnsBackdrop } from './Animations';
+import { ExpandingDots, KenBurnsBackdrop, PressableScale } from './Animations';
 import { Txt } from './Txt';
 
-interface BillboardProps {
+interface Props {
   title: Title;
-  pool?: Title[];
-  inMyList: boolean;
-  isSaved?: (id: string) => boolean;
-  onPlay: (t: Title) => void;
-  onToggleList: (t: Title) => void;
-  onOpen: (t: Title) => void;
+  candidates?: Title[];
+  onPlay: () => void;
+  onInfo: (target?: Title) => void;
+  onPlayTarget?: (target: Title) => void;
 }
 
-export const Billboard = memo(function Billboard({
-  title,
-  pool,
-  inMyList,
-  isSaved,
-  onPlay,
-  onToggleList,
-  onOpen,
-}: BillboardProps) {
-  const { width: screen } = useWindowDimensions();
-  const items = pool && pool.length > 1 ? pool.slice(0, 6) : [title];
+export function Billboard({ title, candidates, onPlay, onInfo, onPlayTarget }: Props) {
+  const { width } = useWindowDimensions();
+  const { profileData, toggleMyList, showToast } = useApp();
+
+  const pool = React.useMemo(() => {
+    const list = candidates && candidates.length > 0 ? candidates.slice(0, 6) : [title];
+    return list.length > 0 ? list : [title];
+  }, [candidates, title]);
+
   const [index, setIndex] = useState(0);
+  const fade = useRef(new Animated.Value(1)).current;
+  const slideY = useRef(new Animated.Value(0)).current;
+
+  const current = pool[index % pool.length] ?? title;
+  const listed = inMyList(profileData, current.id);
+  const height = Math.min(460, Math.round(width * 1.08));
+
+  const switchSlide = useCallback(
+    (nextIdx: number) => {
+      Animated.parallel([
+        Animated.timing(fade, { toValue: 0.15, duration: 180, useNativeDriver: true }),
+        Animated.timing(slideY, { toValue: 8, duration: 180, useNativeDriver: true }),
+      ]).start(() => {
+        setIndex(nextIdx);
+        Animated.parallel([
+          Animated.timing(fade, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.spring(slideY, { toValue: 0, speed: 20, bounciness: 4, useNativeDriver: true }),
+        ]).start();
+      });
+    },
+    [fade, slideY],
+  );
 
   useEffect(() => {
-    if (items.length <= 1) return;
+    if (pool.length <= 1) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % items.length);
-    }, 6500);
+      switchSlide((index + 1) % pool.length);
+    }, 5500);
     return () => clearInterval(timer);
-  }, [items.length]);
+  }, [index, pool.length, switchSlide]);
 
-  const active = items[index % items.length] ?? title;
-  const saved = isSaved ? isSaved(active.id) : inMyList;
-  const width = screen - layout.gutter * 2;
-  const height = Math.round(width * 1.16);
-  const heroImage = active.background || active.poster;
-  const serverBadge = active.serverName ?? sourceBadgeName(active.source);
-  const copies = active.alternatives?.length ?? 1;
+  const heroUri = current.background || current.poster;
+  const serverCount = (current.alternatives?.length ?? 0) + 1;
 
   return (
-    <View style={[styles.card, { width, height }]}>
-      <Pressable onPress={() => onOpen(active)} style={StyleSheet.absoluteFill}>
-        <KenBurnsBackdrop uri={heroImage} tint={active.tint} />
-        <LinearGradient
-          colors={[...GRADIENTS.heroScrim]}
-          locations={[0, 0.38, 0.76, 1]}
-          style={StyleSheet.absoluteFill}
-        />
+    <View style={[styles.wrap, { width, height }]}>
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={() => onInfo(current)}
+        onLongPress={() => {
+          if (pool.length > 1) switchSlide((index + 1) % pool.length);
+        }}
+      >
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade }]}>
+          <KenBurnsBackdrop style={StyleSheet.absoluteFill}>
+            <Image
+              source={heroUri ? { uri: heroUri } : undefined}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={220}
+            />
+          </KenBurnsBackdrop>
+        </Animated.View>
+        <LinearGradient colors={GRADIENTS.heroScrim} locations={[0, 0.42, 0.82, 1]} style={StyleSheet.absoluteFill} />
       </Pressable>
 
-      {/* Top badges: SPOTLIGHT pill + Server / Multi-copy badge */}
-      <View style={styles.topRow} pointerEvents="box-none">
-        <LinearGradient
-          colors={[...GRADIENTS.pill]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.spotlightPill}
-        >
-          <Ionicons name="sparkles" size={11} color="#FFFFFF" />
-          <Txt weight="bold" size={10} spacing={0.7} style={{ marginLeft: 4 }}>
-            SPOTLIGHT #{index + 1}
-          </Txt>
-        </LinearGradient>
-
-        <View style={styles.serverTag}>
-          <View style={styles.onlineDot} />
-          <Txt weight="semibold" size={10} color={colors.text90}>
-            {copies > 1 ? `${serverBadge} +${copies - 1} servers` : serverBadge}
-          </Txt>
-        </View>
-      </View>
-
-      {/* Bottom content */}
-      <View style={styles.content} pointerEvents="box-none">
-        <View style={styles.metaPills}>
-          {active.imdbRating ? (
-            <View style={styles.ratingPill}>
-              <Txt weight="bold" size={11} color={colors.gold}>
-                ★ {active.imdbRating}
-              </Txt>
-            </View>
-          ) : null}
-          <View style={styles.metaChip}>
-            <Txt weight="semibold" size={10} color={colors.text90}>
-              {active.kind === 'series' ? 'TV SERIES' : 'MOVIE'}
+      <Animated.View style={[styles.bottom, { opacity: fade, transform: [{ translateY: slideY }] }]}>
+        {/* Single clean top pill */}
+        <View style={styles.metaTopRow}>
+          <View style={styles.featuredBadge}>
+            <View style={styles.featuredDot} />
+            <Txt weight="bold" size={10} color={colors.mint} spacing={0.8}>
+              {current.kind === 'series' ? 'FEATURED SERIES' : 'FEATURED MOVIE'}
             </Txt>
           </View>
-          {active.year ? (
+          {serverCount > 1 ? (
             <View style={styles.metaChip}>
-              <Txt weight="medium" size={10} color={colors.textMuted}>
-                {active.year}
-              </Txt>
-            </View>
-          ) : null}
-          {active.quality[0] ? (
-            <View style={[styles.metaChip, { borderColor: colors.magenta }]}>
-              <Txt weight="bold" size={10} color={colors.magenta}>
-                {active.quality[0]}
+              <Txt weight="semibold" size={10} color={colors.textSoft}>
+                {serverCount} Servers Ready
               </Txt>
             </View>
           ) : null}
         </View>
 
-        <Pressable onPress={() => onOpen(active)}>
-          <Txt weight="bold" size={26} lineHeight={31} numberOfLines={2} style={styles.heroTitle}>
-            {active.name}
-          </Txt>
-          {active.genres.length > 0 ? (
-            <Txt weight="medium" size={12} color={colors.textMuted} numberOfLines={1} style={{ marginTop: 4 }}>
-              {active.genres.slice(0, 4).join('  ·  ')}
+        <Txt weight="black" size={26} align="center" numberOfLines={2} style={styles.heroTitle}>
+          {current.name}
+        </Txt>
+
+        {/* Clean single-line metadata */}
+        <View style={styles.genreRow}>
+          {current.year ? (
+            <Txt weight="semibold" size={12} color={colors.textSoft}>
+              {current.year}
             </Txt>
           ) : null}
-        </Pressable>
+          {current.imdbRating ? (
+            <>
+              <View style={styles.dotSep} />
+              <Ionicons name="star" size={11} color={colors.gold} style={{ marginRight: 3 }} />
+              <Txt weight="bold" size={12} color={colors.gold}>
+                {current.imdbRating}
+              </Txt>
+            </>
+          ) : null}
+          {current.genres.slice(0, 2).map((g) => (
+            <React.Fragment key={g}>
+              <View style={styles.dotSep} />
+              <Txt weight="medium" size={12} color={colors.textMuted}>
+                {g}
+              </Txt>
+            </React.Fragment>
+          ))}
+        </View>
 
-        <View style={styles.buttons}>
-          <Pressable onPress={() => onPlay(active)} style={styles.playWrap}>
+        <View style={styles.actions}>
+          <PressableScale
+            scaleTo={0.95}
+            onPress={() => (onPlayTarget ? onPlayTarget(current) : onPlay())}
+          >
             <LinearGradient
-              colors={[...GRADIENTS.brand]}
+              colors={GRADIENTS.pill}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.playBtn}
+              style={styles.playPill}
             >
-              <Ionicons name="play" size={18} color="#FFFFFF" />
-              <Txt weight="bold" size={14} color="#FFFFFF" style={{ marginLeft: 6 }}>
-                Stream Now
+              <Ionicons name="play" size={17} color="#04120E" />
+              <Txt weight="black" size={14} color="#04120E" style={{ marginLeft: 6 }}>
+                Watch Now
               </Txt>
             </LinearGradient>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => onOpen(active)} style={styles.glassBtn}>
+          <PressableScale
+            scaleTo={0.95}
+            onPress={() => onInfo(current)}
+            style={styles.glassPill}
+          >
             <Ionicons name="information-circle-outline" size={18} color={colors.text} />
             <Txt weight="semibold" size={13} style={{ marginLeft: 5 }}>
               Details
             </Txt>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => onToggleList(active)} style={styles.iconGlassBtn}>
-            <Ionicons
-              name={saved ? 'bookmark' : 'bookmark-outline'}
-              size={18}
-              color={saved ? colors.pink : colors.text}
-            />
-          </Pressable>
+          <PressableScale
+            scaleTo={0.92}
+            onPress={() => {
+              toggleMyList(current.id);
+              showToast(listed ? 'Removed from My List' : 'Added to My List');
+            }}
+            style={[styles.iconCircle, listed ? styles.iconCircleActive : null]}
+          >
+            <Ionicons name={listed ? 'checkmark' : 'add'} size={20} color={listed ? colors.mint : colors.text} />
+          </PressableScale>
         </View>
 
-        {items.length > 1 ? (
-          <Pressable
-            onPress={() => setIndex((prev) => (prev + 1) % items.length)}
-            hitSlop={10}
-            style={{ marginTop: 12, alignSelf: 'center' }}
-          >
-            <ExpandingDots count={items.length} activeIndex={index % items.length} />
-          </Pressable>
-        ) : null}
-      </View>
+        <View style={{ marginTop: 14 }}>
+          <ExpandingDots count={pool.length} activeIndex={index % pool.length} />
+        </View>
+      </Animated.View>
     </View>
   );
-});
+}
 
 const styles = StyleSheet.create({
-  card: {
-    alignSelf: 'center',
-    borderRadius: radius.xxl,
-    overflow: 'hidden',
-    backgroundColor: colors.surface2,
-    borderWidth: 1,
-    borderColor: 'rgba(139,44,245,0.28)',
-    marginTop: 6,
+  wrap: {
+    justifyContent: 'flex-end',
+    backgroundColor: colors.surface1,
   },
-  topRow: {
-    position: 'absolute',
-    top: 14,
-    left: 14,
-    right: 14,
+  bottom: {
+    paddingHorizontal: layout.gutter + 4,
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
+  metaTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 8,
   },
-  spotlightPill: {
+  featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: radius.pill,
+    backgroundColor: 'rgba(0, 229, 176, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 229, 176, 0.35)',
   },
-  serverTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(18,16,25,0.78)',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
-  },
-  onlineDot: {
+  featuredDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: colors.online,
-    marginRight: 5,
-  },
-  content: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 14,
-  },
-  metaPills: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 8,
-  },
-  ratingPill: {
-    backgroundColor: 'rgba(255,197,61,0.16)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,197,61,0.45)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: radius.sm,
+    backgroundColor: colors.mint,
+    marginRight: 6,
   },
   metaChip: {
-    backgroundColor: 'rgba(27,24,36,0.82)',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(19, 30, 48, 0.85)',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: radius.sm,
+    borderColor: colors.border,
   },
   heroTitle: {
-    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowColor: 'rgba(0,0,0,0.85)',
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    textShadowRadius: 8,
+    letterSpacing: -0.3,
   },
-  buttons: {
+  genreRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
+    marginBottom: 16,
+  },
+  dotSep: {
+    width: 3.5,
+    height: 3.5,
+    borderRadius: 2,
+    backgroundColor: colors.textDim,
+    marginHorizontal: 7,
+  },
+  actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
-    marginTop: 14,
   },
-  playWrap: {
-    flex: 1.35,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-  },
-  playBtn: {
-    height: 44,
+  playPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.lg,
-  },
-  glassBtn: {
-    flex: 1,
     height: 44,
+    paddingHorizontal: 24,
+    borderRadius: radius.pill,
+  },
+  glassPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(38,34,47,0.78)',
-    borderRadius: radius.lg,
+    height: 44,
+    paddingHorizontal: 18,
+    borderRadius: radius.pill,
+    backgroundColor: colors.glassButton,
     borderWidth: 1,
     borderColor: colors.glassBorder,
   },
-  iconGlassBtn: {
+  iconCircle: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(38,34,47,0.78)',
-    borderRadius: radius.lg,
+    borderRadius: 22,
+    backgroundColor: colors.glassButton,
     borderWidth: 1,
     borderColor: colors.glassBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCircleActive: {
+    borderColor: colors.mint,
+    backgroundColor: 'rgba(0, 229, 176, 0.16)',
   },
 });

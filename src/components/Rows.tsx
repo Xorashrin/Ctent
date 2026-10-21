@@ -14,7 +14,7 @@ import { sourceBadgeName, type SectionStyle, type Title } from '../data/types';
 import type { FeaturedBdixFolder } from '../services/directoryBrowser';
 import type { ProgressEntry } from '../state/AppState';
 import { colors, GRADIENTS, layout, radius } from '../theme/tokens';
-import { ShimmerBox } from './Animations';
+import { FadeSlideIn, PressableScale, ShimmerBox } from './Animations';
 import { ProgressBar } from './Buttons';
 import { Image } from './Img';
 import { POSTER, Poster } from './Poster';
@@ -125,16 +125,16 @@ export const PosterRow = memo(function PosterRow({
                 />
               ) : null}
               <LinearGradient
-                colors={['transparent', 'rgba(7,6,11,0.88)']}
+                colors={['transparent', 'rgba(6,10,16,0.90)']}
                 locations={[0.35, 1]}
                 style={StyleSheet.absoluteFill}
               />
               <View style={styles.landscapePlay}>
-                <Ionicons name="play" size={15} color="#FFFFFF" style={{ marginLeft: 1 }} />
+                <Ionicons name="play" size={14} color="#04120E" style={{ marginLeft: 1 }} />
               </View>
               {item.airing ? (
                 <View style={styles.airingPill}>
-                  <Txt weight="bold" size={9} color="#07060B">
+                  <Txt weight="bold" size={9} color="#04120E">
                     EP {item.airing.episode} SOON
                   </Txt>
                 </View>
@@ -166,14 +166,14 @@ export const PosterRow = memo(function PosterRow({
       if (styleType === 'TOP10') {
         return (
           <View style={styles.top10Wrap}>
-            <Poster title={item} width={width} height={height} onPress={onPressTitle} />
+            <Poster title={item} width={width} height={height} onPress={onPressTitle} showTitle />
             <LinearGradient
-              colors={[...GRADIENTS.brand]}
+              colors={GRADIENTS.pill}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.rankBadge}
             >
-              <Txt weight="bold" size={11} color="#FFFFFF">
+              <Txt weight="black" size={11} color="#04120E">
                 #{index + 1}
               </Txt>
             </LinearGradient>
@@ -181,7 +181,7 @@ export const PosterRow = memo(function PosterRow({
         );
       }
 
-      return <Poster title={item} width={width} height={height} onPress={onPressTitle} />;
+      return <Poster title={item} width={width} height={height} onPress={onPressTitle} showTitle />;
     },
     [styleType, width, height, onPressTitle],
   );
@@ -190,7 +190,7 @@ export const PosterRow = memo(function PosterRow({
   const data = styleType === 'TOP10' ? items.slice(0, 10) : items;
 
   return (
-    <View style={styles.row}>
+    <FadeSlideIn style={styles.row}>
       <RowHeader title={title} subtitle={subtitle} onSeeAll={onSeeAll} />
       <FlatList
         {...listProps}
@@ -203,7 +203,7 @@ export const PosterRow = memo(function PosterRow({
           index,
         })}
       />
-    </View>
+    </FadeSlideIn>
   );
 });
 
@@ -347,14 +347,14 @@ const styles = StyleSheet.create({
     width: 4,
     height: 18,
     borderRadius: 2,
-    backgroundColor: colors.violet,
-    marginRight: 8,
+    backgroundColor: colors.mint,
+    marginRight: 9,
   },
   seeAll: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(226,28,240,0.12)',
-    paddingHorizontal: 9,
+    backgroundColor: 'rgba(0, 229, 176, 0.12)',
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: radius.pill,
     gap: 2,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
+    borderColor: colors.border,
   },
   landscapePlay: {
     position: 'absolute',
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'rgba(139,44,245,0.88)',
+    backgroundColor: colors.mint,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: 'rgba(12,10,18,0.82)',
+    backgroundColor: 'rgba(9, 15, 24, 0.85)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: radius.xs,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: colors.cyan,
+    backgroundColor: colors.mint,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: radius.xs,
@@ -407,13 +407,11 @@ const styles = StyleSheet.create({
   },
   rankBadge: {
     position: 'absolute',
-    bottom: 42,
-    right: 6,
+    top: 7,
+    left: 7,
     paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
+    borderRadius: radius.xs,
   },
   folderCard: {
     width: 176,
@@ -421,7 +419,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: colors.surface2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: colors.border,
   },
   folderIconWrap: {
     width: 40,
@@ -437,7 +435,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopColor: colors.border,
   },
   folderDot: {
     width: 6,
@@ -451,7 +449,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.surface2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
+    borderColor: colors.border,
   },
   continueImage: {
     height: 112,
@@ -463,9 +461,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(139,44,245,0.88)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: colors.mint,
     alignItems: 'center',
     justifyContent: 'center',
   },

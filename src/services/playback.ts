@@ -17,10 +17,21 @@ import { loadProviders, penalizeProvider, rankProviders, runProvider } from './n
 import { expandLink, hostLabel, resolveMirror, type Playable } from './resolvers';
 import * as amaderftp from './sources/amaderftp';
 import { gatherDirectAnimeStreams } from './sources/animeDirect';
+import * as archiveOrg from './sources/archiveOrg';
 import * as bdix from './sources/bdix';
 import * as circleftp from './sources/circleftp';
 import * as cyberftp from './sources/cyberftp';
-import { findAddon, STREMIFY, streams as addonStreams } from './sources/stremio';
+import {
+  AIOSTREAMS,
+  COMET,
+  findAddon,
+  MEDIAFUSION,
+  NODEBRID,
+  STREMIFY,
+  streams as addonStreams,
+  TORRENTIO_LITE,
+  TPB_PLUS,
+} from './sources/stremio';
 import { getVariants, listPosts, siteFor, SOUTHFREAK, type Variant } from './sources/wordpress';
 
 export type QualityPref = 'auto' | '1080p' | '720p' | '480p';
@@ -643,12 +654,21 @@ function buildGatherers(title: Title, episode: Episode | undefined, quick: boole
     } else if (title.source === 'cyberftp') {
       const files = await cyberftp.getFiles(title);
       add(files.map((f, i) => fileServer(ctx, `cy:${title.id}:${i}`, 'CyberFTP', f.url, [f.url], f.label, 'bdix', true)));
-    } else if (title.source === 'bdix' && title.files) {
+    } else if ((title.source === 'bdix' || title.source === 'vodm3u') && title.files) {
       add(
         title.files.map((f, i) =>
-          fileServer(ctx, `bx:${title.id}:${i}`, title.serverName ?? 'BDIX', f.url, [f.url], f.label, 'bdix', true),
+          fileServer(ctx, `bx:${title.id}:${i}`, title.serverName ?? 'Direct VOD', f.url, [f.url], f.label, 'bdix', true),
         ),
       );
+    } else if (title.source === 'archive') {
+      const detailed = await archiveOrg.archiveOrgDetail(title);
+      if (detailed.files) {
+        add(
+          detailed.files.map((f, i) =>
+            fileServer(ctx, `ar:${title.id}:${i}`, 'Internet Archive', f.url, [f.url], f.label, 'local', true),
+          ),
+        );
+      }
     } else if (title.source === 'stremio') {
       const addon = findAddon(title.addon);
       if (!addon) return;
@@ -771,24 +791,26 @@ function buildGatherers(title: Title, episode: Episode | undefined, quick: boole
       const tasks: Promise<void>[] = [];
       if (ids.imdbId) {
         const sid = kind === 'tv' ? `${ids.imdbId}:${season}:${number}` : ids.imdbId;
-        tasks.push(
-          addonStreams(STREMIFY, kind === 'tv' ? 'series' : 'movie', sid)
-            .then((streams) =>
-              add(
-                streamServers(
-                  ctx,
-                  streams.map((s) => ({
-                    url: s.url!,
-                    quality: s.name ?? s.title,
-                    provider: STREMIFY.name,
-                    headers: s.behaviorHints?.proxyHeaders?.request,
-                  })),
-                  'stremio',
+        for (const addon of [STREMIFY, NODEBRID, MEDIAFUSION, COMET, AIOSTREAMS, TORRENTIO_LITE, TPB_PLUS]) {
+          tasks.push(
+            addonStreams(addon, kind === 'tv' ? 'series' : 'movie', sid)
+              .then((streams) =>
+                add(
+                  streamServers(
+                    ctx,
+                    streams.map((s) => ({
+                      url: s.url!,
+                      quality: s.name ?? s.title,
+                      provider: addon.name,
+                      headers: s.behaviorHints?.proxyHeaders?.request,
+                    })),
+                    'stremio',
+                  ),
                 ),
-              ),
-            )
-            .catch(() => undefined),
-        );
+              )
+              .catch(() => undefined),
+          );
+        }
       }
       if (ids.tmdbId) {
         const tmdb = String(ids.tmdbId);

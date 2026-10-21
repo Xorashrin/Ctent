@@ -1,15 +1,14 @@
-// Ctent Anime Hub — reverse-engineered from app-release.apk (Lq8 AnimeScreen & Lh8).
+// MythTube Anime Hub — Aurora Slate & Mint-Cyan Organizer
 // Features:
 // - "On Your BDIX Servers" full-speed anime row (CircleFTP + CyberFTP anime)
-// - "Anime Portals & Direct DDL" organizer row (19 Wotaku + Tokyo Insider portals)
-// - "Explore by Genre" neon chips (ANIME_GENRES)
+// - "Anime Portals & Direct DDL" organizer row (27 Wotaku + AniSpace + Tokyo Insider portals)
+// - "Explore by Genre" chips (ANIME_GENRES)
 // - Airing schedule (LANDSCAPE), Top 10 Trending (TOP10), Seasonal, Popular, Top Rated & Anime Movies
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -17,7 +16,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { ShimmerBox } from '../components/Animations';
+import { FadeSlideIn, PressableScale, ShimmerBox } from '../components/Animations';
 import { Billboard } from '../components/Billboard';
 import { Chip } from '../components/Chip';
 import { Poster } from '../components/Poster';
@@ -87,7 +86,7 @@ export default function AnimeScreen() {
   }, [genre]);
 
   const handlePortalPress = (portal: WotakuAnimeServer) => {
-    showToast(`${portal.name} is active in Ctent's Anime Source Engine`);
+    showToast(`${portal.name} is active in MythTube's Anime Engine`);
     nav.navigate('Search', { kind: 'anime' });
   };
 
@@ -104,7 +103,7 @@ export default function AnimeScreen() {
     <View style={styles.root}>
       <ScreenHeader
         title="Anime Hub"
-        subtitle="BDIX Direct · AniList · 19 Wotaku Portals"
+        subtitle={`BDIX Direct · AniList · ${WOTAKU_ANIME_SERVERS.length} Anime Portals`}
         showServerPill
         actions={['search']}
         searchScope={{ kind: 'anime' }}
@@ -124,7 +123,7 @@ export default function AnimeScreen() {
           removeClippedSubviews
           ListHeaderComponent={chips}
           ListFooterComponent={
-            loading ? <ActivityIndicator color={colors.magenta} style={{ padding: 24 }} /> : <View style={{ height: 24 }} />
+            loading ? <ActivityIndicator color={colors.mint} style={{ padding: 24 }} /> : <View style={{ height: 24 }} />
           }
           renderItem={({ item }) => (
             <Poster title={item} width={cell} height={Math.round(cell * 1.46)} onPress={openTitle} />
@@ -134,7 +133,7 @@ export default function AnimeScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 38 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.magenta} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.mint} />}
         >
           {chips}
           {hero ? (
@@ -148,7 +147,7 @@ export default function AnimeScreen() {
               onToggleList={(t) => {
                 const exists = profileData.myList.includes(t.id);
                 toggleMyList(t.id);
-                showToast(exists ? 'Removed from My Ctent' : 'Saved to My Ctent');
+                showToast(exists ? 'Removed from My Space' : 'Saved to My Space');
               }}
             />
           ) : (
@@ -157,11 +156,11 @@ export default function AnimeScreen() {
             </View>
           )}
 
-          {/* Anime Portals Organizer (wotaku_anime_servers.json + Tokyo Insider DDL) */}
-          <View style={{ marginTop: 22 }}>
+          {/* Anime Portals Organizer (27 Wotaku + AniSpace + Tokyo Insider DDL) */}
+          <FadeSlideIn delay={40} distance={10} style={{ marginTop: 22 }}>
             <RowHeader
               title="Anime Portals & Direct Scrapers"
-              subtitle={`${WOTAKU_ANIME_SERVERS.length} verified anime sources (Tokyo Insider DDL, AniZone, Pahe, KAA)`}
+              subtitle={`${WOTAKU_ANIME_SERVERS.length} verified anime sources (Tokyo Insider, AniSpace, AniZone, Pahe, KAA)`}
               onSeeAll={() => nav.navigate('ServersModal')}
             />
             <ScrollView
@@ -172,12 +171,13 @@ export default function AnimeScreen() {
               {WOTAKU_ANIME_SERVERS.map((p, idx) => {
                 const accent = PORTAL_PALETTE[idx % PORTAL_PALETTE.length];
                 return (
-                  <Pressable
+                  <PressableScale
                     key={p.id}
+                    scaleTo={0.96}
                     onPress={() => handlePortalPress(p)}
-                    style={[styles.portalCard, { borderColor: `${accent}55` }]}
+                    style={[styles.portalCard, { borderColor: `${accent}44` }]}
                   >
-                    <View style={[styles.portalIcon, { backgroundColor: `${accent}22` }]}>
+                    <View style={[styles.portalIcon, { backgroundColor: `${accent}1E` }]}>
                       <MaterialCommunityIcons name="star-four-points" size={18} color={accent} />
                     </View>
                     <Txt weight="bold" size={13} numberOfLines={1} style={{ marginTop: 8 }}>
@@ -187,16 +187,16 @@ export default function AnimeScreen() {
                       {p.url.replace(/^https?:\/\/(www\.)?/, '')}
                     </Txt>
                     <View style={styles.portalStatus}>
-                      <View style={[styles.portalDot, { backgroundColor: colors.online }]} />
-                      <Txt weight="semibold" size={9} color={ accent }>
+                      <View style={[styles.portalDot, { backgroundColor: colors.mint }]} />
+                      <Txt weight="semibold" size={9} color={accent}>
                         {p.source.toUpperCase()}
                       </Txt>
                     </View>
-                  </Pressable>
+                  </PressableScale>
                 );
               })}
             </ScrollView>
-          </View>
+          </FadeSlideIn>
 
           {rows.map((r) =>
             r.items.length === 0 ? (

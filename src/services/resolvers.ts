@@ -159,9 +159,31 @@ async function gdxshare(url: string): Promise<Playable> {
 }
 
 async function googleDrive(url: string): Promise<Playable> {
-  const id = /\/d\/([\w-]{20,})/.exec(url)?.[1] ?? /[?&]id=([\w-]{20,})/.exec(url)?.[1];
+  const id = /\/d\/([\w-]{20,})/.exec(url)?.[1] ?? /[?&]id=([\w-]{20,})/.exec(url)?.[1] ?? /file_id=([\w-]{15,})/.exec(url)?.[1];
   if (!id) throw new Error('Drive: no file id');
-  return firstPlayable([`https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`], 'Google Drive');
+  const candidates: string[] = [
+    `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`,
+    `https://drive.google.com/uc?export=download&id=${id}`,
+  ];
+  try {
+    const gdpRes = await request(`https://gdplayer.vip/api/video?file_id=${encodeURIComponent(id)}`, {
+      timeout: 8000,
+      retries: 0,
+      headers: { Accept: 'application/json' },
+    });
+    const gdpJson = JSON.parse(gdpRes.text) as { status?: string; data?: { embed_url?: string } };
+    if (gdpJson.status === 'ok' && gdpJson.data?.embed_url) {
+      const embedHtml = await getText(gdpJson.data.embed_url, { timeout: 8000, retries: 0 });
+      for (const l of links(embedHtml)) {
+        if (/googleusercontent|\.m3u8|\.mp4/i.test(l) && !candidates.includes(l)) {
+          candidates.unshift(l);
+        }
+      }
+    }
+  } catch {
+    // Fall back to direct Google Drive usercontent download URL
+  }
+  return firstPlayable(candidates, 'Google Drive / GDPlayer');
 }
 
 async function generic(url: string): Promise<Playable> {

@@ -22,11 +22,11 @@ interface ButtonProps {
 }
 
 const VARIANTS = {
-  white: { bg: colors.accentPurple, pressed: colors.accentViolet, fg: '#FFFFFF', border: colors.accentMagenta },
+  white: { bg: colors.mint, pressed: colors.cyan, fg: '#04120E', border: colors.mint },
   gray: { bg: colors.surface3, pressed: colors.surface4, fg: colors.text, border: colors.outline },
-  red: { bg: colors.accentPink, pressed: colors.accentMagenta, fg: '#FFFFFF', border: 'transparent' },
-  glass: { bg: colors.glassButton, pressed: 'rgba(139,44,245,0.28)', fg: colors.text, border: colors.outline },
-  outline: { bg: 'transparent', pressed: 'rgba(139,44,245,0.14)', fg: colors.text, border: colors.outlineActive },
+  red: { bg: colors.rose, pressed: colors.danger, fg: '#FFFFFF', border: 'transparent' },
+  glass: { bg: colors.glassButton, pressed: 'rgba(0, 229, 176, 0.22)', fg: colors.text, border: colors.outline },
+  outline: { bg: 'transparent', pressed: 'rgba(0, 229, 176, 0.14)', fg: colors.text, border: colors.outlineActive },
 } as const;
 
 export function Button({ label, onPress, icon, variant = 'white', height = 40, style, disabled, loading, children }: ButtonProps) {

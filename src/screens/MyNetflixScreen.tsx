@@ -1,14 +1,15 @@
-// Ctent Library & Hub ("My Ctent") — reverse-engineered from app-release.apk (Lz8 MyListScreen).
+// MythTube Library & Hub ("My Space") — Aurora Slate & Mint-Cyan Organizer
 // Combines:
-// - Stats dashboard (Saved in My Ctent, Offline Downloads, Online BDIX Servers, Continue Watching)
-// - Quick Organizer Grid (Downloads, BDIX Server Manager, Live TV Channels, Live News, App Settings, 18+ Vault)
-// - Watchlist ("My Ctent"), Liked Titles & Live TV Channel Strip
+// - Stats dashboard (Saved in My Space, Offline Downloads, Online BDIX Servers, Continue Watching)
+// - Quick Organizer Grid (Downloads, BDIX & IPTV Hub, Live TV Channels, Live News, App Settings, 18+ Vault)
+// - Watchlist ("My Space"), Liked Titles & Live TV Channel Strip
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
+import { FadeSlideIn, PressableScale } from '../components/Animations';
 import { ChannelLogo } from '../components/ChannelLogo';
 import { Poster, POSTER } from '../components/Poster';
 import { RowHeader } from '../components/Rows';
@@ -20,7 +21,7 @@ import { useRootNav } from '../navigation/types';
 import { resolveTitle } from '../services/catalog';
 import { useServerEngine } from '../services/serverEngine';
 import { useApp } from '../state/AppState';
-import { colors, GRADIENTS, layout, radius } from '../theme/tokens';
+import { colors, layout, radius } from '../theme/tokens';
 
 export default function MyNetflixScreen() {
   const nav = useRootNav();
@@ -39,7 +40,7 @@ export default function MyNetflixScreen() {
   return (
     <View style={styles.root}>
       <ScreenHeader
-        title="My Ctent"
+        title="My Space"
         subtitle="Library · Offline Downloads · Live TV · Settings"
         showServerPill
         actions={['search']}
@@ -47,53 +48,55 @@ export default function MyNetflixScreen() {
 
       <ScrollView contentContainerStyle={{ paddingBottom: 42 }} showsVerticalScrollIndicator={false}>
         {/* Dashboard Stats Card */}
-        <LinearGradient
-          colors={['rgba(59,28,255,0.22)', 'rgba(139,44,245,0.18)', 'rgba(27,24,36,0.92)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.statsCard}
-        >
-          <View style={styles.statBox}>
-            <Txt weight="bold" size={20} color={colors.magenta}>
-              {myList.length}
-            </Txt>
-            <Txt size={11} color={colors.textMuted}>
-              Saved
-            </Txt>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBox}>
-            <Txt weight="bold" size={20} color={colors.cyan}>
-              {downloadCount}
-            </Txt>
-            <Txt size={11} color={colors.textMuted}>
-              Downloads
-            </Txt>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBox}>
-            <Txt weight="bold" size={20} color={colors.online}>
-              {serverState.onlineCount}
-            </Txt>
-            <Txt size={11} color={colors.textMuted}>
-              Online BDIX
-            </Txt>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBox}>
-            <Txt weight="bold" size={20} color={colors.gold}>
-              {profileData.progress.length}
-            </Txt>
-            <Txt size={11} color={colors.textMuted}>
-              History
-            </Txt>
-          </View>
-        </LinearGradient>
+        <FadeSlideIn delay={20} distance={10}>
+          <LinearGradient
+            colors={['rgba(0, 229, 176, 0.14)', 'rgba(14, 165, 233, 0.12)', 'rgba(13, 21, 34, 0.94)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.statsCard}
+          >
+            <View style={styles.statBox}>
+              <Txt weight="bold" size={20} color={colors.mint}>
+                {myList.length}
+              </Txt>
+              <Txt size={11} color={colors.textMuted}>
+                Saved
+              </Txt>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Txt weight="bold" size={20} color={colors.cyan}>
+                {downloadCount}
+              </Txt>
+              <Txt size={11} color={colors.textMuted}>
+                Downloads
+              </Txt>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Txt weight="bold" size={20} color={colors.emerald}>
+                {serverState.onlineCount}
+              </Txt>
+              <Txt size={11} color={colors.textMuted}>
+                Online BDIX
+              </Txt>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Txt weight="bold" size={20} color={colors.amber}>
+                {profileData.progress.length}
+              </Txt>
+              <Txt size={11} color={colors.textMuted}>
+                History
+              </Txt>
+            </View>
+          </LinearGradient>
+        </FadeSlideIn>
 
         {/* Organizer Action Tiles */}
-        <View style={styles.tileGrid}>
-          <Pressable onPress={() => nav.navigate('Downloads')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(61,220,255,0.16)' }]}>
+        <FadeSlideIn delay={55} distance={12} style={styles.tileGrid}>
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('Downloads')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(14, 165, 233, 0.14)' }]}>
               <Ionicons name="download-outline" size={20} color={colors.cyan} />
             </View>
             <View style={{ flex: 1 }}>
@@ -104,11 +107,11 @@ export default function MyNetflixScreen() {
                 {downloadCount > 0 ? `${downloadCount} offline files` : 'Multi-thread Giga'}
               </Txt>
             </View>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => nav.navigate('MyList')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(226,28,240,0.16)' }]}>
-              <Ionicons name="bookmark-outline" size={20} color={colors.magenta} />
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('MyList')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(0, 229, 176, 0.14)' }]}>
+              <Ionicons name="bookmark-outline" size={20} color={colors.mint} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt weight="bold" size={14}>
@@ -118,25 +121,25 @@ export default function MyNetflixScreen() {
                 {myList.length} saved titles
               </Txt>
             </View>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => nav.navigate('ServersModal')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(34,211,122,0.16)' }]}>
-              <MaterialCommunityIcons name="server-network" size={20} color={colors.online} />
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('ServersModal')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(16, 185, 129, 0.14)' }]}>
+              <MaterialCommunityIcons name="server-network" size={20} color={colors.emerald} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt weight="bold" size={14}>
-                BDIX Routers
+                BDIX & IPTV
               </Txt>
               <Txt size={11} color={colors.textDim}>
                 {serverState.totalKnown} servers
               </Txt>
             </View>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => nav.navigate('Notifications')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(255,176,32,0.16)' }]}>
-              <Ionicons name="radio-outline" size={20} color={colors.warning} />
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('Notifications')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(245, 158, 11, 0.14)' }]}>
+              <Ionicons name="radio-outline" size={20} color={colors.amber} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt weight="bold" size={14}>
@@ -146,11 +149,11 @@ export default function MyNetflixScreen() {
                 24/7 TV streams
               </Txt>
             </View>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => nav.navigate('AppSettings')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(139,44,245,0.18)' }]}>
-              <Ionicons name="settings-outline" size={20} color={colors.violet} />
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('AppSettings')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(59, 130, 246, 0.16)' }]}>
+              <Ionicons name="settings-outline" size={20} color={colors.sapphire} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt weight="bold" size={14}>
@@ -160,27 +163,27 @@ export default function MyNetflixScreen() {
                 Quality, threads & dir
               </Txt>
             </View>
-          </Pressable>
+          </PressableScale>
 
-          <Pressable onPress={() => nav.navigate('AdultContent')} style={styles.tile}>
-            <View style={[styles.tileIcon, { backgroundColor: 'rgba(255,45,149,0.16)' }]}>
-              <Ionicons name="flame-outline" size={20} color={colors.pink} />
+          <PressableScale scaleTo={0.96} onPress={() => nav.navigate('AdultContent')} style={styles.tile}>
+            <View style={[styles.tileIcon, { backgroundColor: 'rgba(244, 63, 94, 0.14)' }]}>
+              <Ionicons name="flame-outline" size={20} color={colors.rose} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt weight="bold" size={14}>
                 18+ Vault
               </Txt>
               <Txt size={11} color={colors.textDim}>
-                Adult catalogs
+                Adult catalogs & TV
               </Txt>
             </View>
-          </Pressable>
-        </View>
+          </PressableScale>
+        </FadeSlideIn>
 
         {/* Saved Watchlist Row */}
         {myList.length > 0 ? (
           <View style={{ marginTop: 22 }}>
-            <RowHeader title="Saved in My Ctent" subtitle="Your bookmarked movies, series & anime" onSeeAll={() => nav.navigate('MyList')} />
+            <RowHeader title="Saved in My Space" subtitle="Your bookmarked movies, series & anime" onSeeAll={() => nav.navigate('MyList')} />
             <FlatList
               horizontal
               data={myList}
@@ -208,7 +211,7 @@ export default function MyNetflixScreen() {
         ) : null}
 
         {/* Live TV Channels Organizer */}
-        <View style={{ marginTop: 24 }}>
+        <FadeSlideIn delay={90} distance={12} style={{ marginTop: 24 }}>
           <RowHeader
             title="Live TV Channels"
             subtitle="Bangladeshi, Indian & International live broadcasts"
@@ -221,7 +224,8 @@ export default function MyNetflixScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: layout.gutter, gap: 10 }}
             renderItem={({ item }) => (
-              <Pressable
+              <PressableScale
+                scaleTo={0.95}
                 onPress={() => nav.navigate('Live', { channelId: item.id })}
                 style={styles.channelCard}
               >
@@ -229,10 +233,10 @@ export default function MyNetflixScreen() {
                 <Txt weight="semibold" size={11} numberOfLines={1} style={{ marginTop: 6 }}>
                   {item.name}
                 </Txt>
-              </Pressable>
+              </PressableScale>
             )}
           />
-        </View>
+        </FadeSlideIn>
       </ScrollView>
     </View>
   );
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: 'rgba(139,44,245,0.32)',
+    borderColor: 'rgba(0, 229, 176, 0.28)',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -258,7 +262,7 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 28,
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(148, 163, 184, 0.16)',
   },
   tileGrid: {
     flexDirection: 'row',
@@ -273,8 +277,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: radius.lg,
     backgroundColor: colors.surface1,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
+    borderWidth: 1,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,

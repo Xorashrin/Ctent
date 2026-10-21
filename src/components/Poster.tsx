@@ -1,176 +1,193 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { memo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-
-import { sourceBadgeName, type Title } from '../data/types';
-import { colors, radius } from '../theme/tokens';
+// MythTube Clean Poster Card — Zero visual clutter ("zero hibijibi"):
+// - Single clean top-right pill badge (+N servers in Aurora Mint, or quality/rating)
+// - Smooth spring press animation (0.96x)
+// - Optional clean title & progress footer
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from './Img';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { memo, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
+
+import type { Title } from '../data/types';
+import { colors, GRADIENTS, radius } from '../theme/tokens';
 import { Txt } from './Txt';
 
-export const POSTER = { width: 122, height: 178 } as const;
-export const TALL_POSTER = { width: 146, height: 218 } as const;
+export const POSTER = { width: 118, height: 176 } as const;
 
-const BADGE_LABEL = { new: 'NEW', 'new-episode': 'NEW EP', airing: 'AIRING' } as const;
+const TINTS = ['#0D1F2D', '#0E2438', '#112A3E', '#14263B', '#0F292E', '#17253B', '#122234', '#0C1E2C'];
 
-export function thumbUri(uri: string, width: number): string {
-  if (width > 170) return uri;
-  return uri
-    .replace('images.metahub.space/poster/medium/', 'images.metahub.space/poster/small/')
-    .replace('image.tmdb.org/t/p/w500/', 'image.tmdb.org/t/p/w342/')
-    .replace('/cover/extraLarge/', '/cover/large/');
+function tintFor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return TINTS[Math.abs(h) % TINTS.length];
 }
 
-export function categoryOf(t: Title): string {
-  if (t.nsfw) return 'Adult';
-  if (t.source === 'anilist' || t.source === 'animedirect' || t.genres.includes('Anime')) {
-    return t.kind === 'movie' ? 'Anime Movie' : 'Anime';
-  }
-  return t.kind === 'series' ? 'TV Series' : 'Movie';
-}
-
-interface PosterProps {
+interface Props {
   title: Title;
   width?: number;
   height?: number;
+  aspect?: 'poster' | 'backdrop';
+  progress?: number;
+  badge?: string;
+  altCount?: number;
+  showTitle?: boolean;
   onPress?: (title: Title) => void;
-  showBadges?: boolean;
-  showCaption?: boolean;
-  label?: string;
 }
 
 export const Poster = memo(function Poster({
   title,
-  width = POSTER.width,
-  height = POSTER.height,
+  width = 116,
+  height = 172,
+  aspect = 'poster',
+  progress,
+  badge,
+  altCount,
+  showTitle = false,
   onPress,
-  showBadges = true,
-  showCaption = true,
-  label,
-}: PosterProps) {
-  const raw = title.poster || title.background;
-  const uri = raw ? thumbUri(raw, width) : undefined;
-  const copies = title.alternatives?.length ?? 1;
-  const topTag =
-    label ??
-    (copies > 1
-      ? `${copies} SRV`
-      : title.quality[0] && title.quality[0] !== 'Anime'
-        ? title.quality[0]
-        : sourceBadgeName(title.source, title.serverName));
+}: Props) {
+  const uri = aspect === 'backdrop' ? title.background || title.poster : title.poster || title.background;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 36,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 28,
+      bounciness: 6,
+    }).start();
+  };
+
+  // Single clean top-right badge to avoid visual clutter
+  const extraServers = altCount ?? title.alternatives?.length ?? 0;
+  const topRightLabel =
+    extraServers > 0
+      ? `+${extraServers + 1} Servers`
+      : badge || (title.hdLabel && title.hdLabel !== 'HD' ? title.hdLabel : undefined);
 
   return (
     <Pressable
       onPress={onPress ? () => onPress(title) : undefined}
-      style={({ pressed }) => [{ width, transform: [{ scale: pressed ? 0.96 : 1 }] }]}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
     >
-      <View style={[styles.frame, { width, height, backgroundColor: title.tint || colors.surface2 }]}>
-        {uri ? (
+      <Animated.View style={{ width, transform: [{ scale }] }}>
+        <View style={[styles.card, { width, height, backgroundColor: tintFor(title.id) }]}>
           <Image
-            source={{ uri }}
+            source={uri ? { uri } : undefined}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
             cachePolicy="memory-disk"
-            recyclingKey={title.id}
+            recyclingKey={`${title.id}-${aspect}`}
+            transition={150}
           />
-        ) : null}
-        <LinearGradient
-          colors={['rgba(7,6,11,0.18)', 'rgba(7,6,11,0)', 'rgba(7,6,11,0.82)']}
-          locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-        {!uri ? (
-          <View style={styles.fallback}>
-            <Txt weight="bold" size={13} lineHeight={17} align="center" numberOfLines={4}>
+          <LinearGradient colors={GRADIENTS.cardScrim} style={styles.bottomScrim} />
+
+          {/* Single clean top-right badge */}
+          {topRightLabel ? (
+            <View style={[styles.topBadge, extraServers > 0 ? styles.topBadgeMint : null]}>
+              <Txt weight="bold" size={9} color={extraServers > 0 ? '#04120E' : colors.text} spacing={0.3}>
+                {topRightLabel}
+              </Txt>
+            </View>
+          ) : null}
+
+          {/* Bottom-left subtle rating pill only when available */}
+          {title.imdbRating ? (
+            <View style={styles.ratingBadge}>
+              <Ionicons name="star" size={9} color={colors.gold} />
+              <Txt weight="bold" size={10} color={colors.text} style={{ marginLeft: 3 }}>
+                {title.imdbRating}
+              </Txt>
+            </View>
+          ) : null}
+
+          {progress !== undefined && progress > 0 ? (
+            <View style={styles.progressTrack}>
+              <LinearGradient
+                colors={GRADIENTS.pill}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ width: `${Math.min(100, Math.round(progress * 100))}%`, height: '100%' }}
+              />
+            </View>
+          ) : null}
+        </View>
+
+        {showTitle ? (
+          <View style={styles.captionWrap}>
+            <Txt weight="semibold" size={12} color={colors.text90} numberOfLines={1}>
               {title.name}
             </Txt>
-          </View>
-        ) : null}
-
-        {showBadges && title.imdbRating ? (
-          <View style={styles.rating}>
-            <Txt weight="bold" size={10} color={colors.gold}>
-              ★ {title.imdbRating}
+            <Txt size={10} color={colors.textDim} numberOfLines={1} style={{ marginTop: 1 }}>
+              {title.year ? `${title.year}` : ''}
+              {title.genres[0] ? ` • ${title.genres[0]}` : ''}
             </Txt>
           </View>
         ) : null}
-
-        {showBadges && topTag ? (
-          <View style={[styles.label, copies > 1 ? { backgroundColor: colors.online } : null]}>
-            <Txt weight="bold" size={9} color={copies > 1 ? '#07060B' : '#FFFFFF'} numberOfLines={1}>
-              {topTag.toUpperCase()}
-            </Txt>
-          </View>
-        ) : null}
-
-        {showBadges && title.badge ? (
-          <View style={styles.badge}>
-            <Txt weight="bold" size={9} color="#FFFFFF">
-              {BADGE_LABEL[title.badge]}
-            </Txt>
-          </View>
-        ) : null}
-      </View>
-
-      {showCaption ? (
-        <View style={styles.captionWrap}>
-          <Txt weight="semibold" size={12} numberOfLines={1} color={colors.text90}>
-            {title.name}
-          </Txt>
-          <Txt size={10} color={colors.textDim} numberOfLines={1}>
-            {[title.year || '', title.serverName ?? sourceBadgeName(title.source)].filter(Boolean).join(' · ')}
-          </Txt>
-        </View>
-      ) : null}
+      </Animated.View>
     </Pressable>
   );
 });
 
 const styles = StyleSheet.create({
-  frame: {
+  card: {
     borderRadius: radius.md,
     overflow: 'hidden',
-    backgroundColor: colors.surface2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(148, 163, 184, 0.16)',
   },
-  fallback: {
-    ...StyleSheet.absoluteFill,
+  bottomScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 48,
+  },
+  topBadge: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    backgroundColor: 'rgba(9, 15, 24, 0.84)',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  topBadgeMint: {
+    backgroundColor: colors.mint,
+    borderColor: colors.mint,
+  },
+  ratingBadge: {
+    position: 'absolute',
+    bottom: 7,
+    left: 7,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-  },
-  rating: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    backgroundColor: 'rgba(12,10,18,0.82)',
-    borderRadius: radius.xs,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,197,61,0.35)',
-  },
-  label: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: 'rgba(139,44,245,0.88)',
-    borderRadius: radius.xs,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    maxWidth: 64,
-  },
-  badge: {
-    position: 'absolute',
-    bottom: 6,
-    left: 6,
-    backgroundColor: colors.pink,
-    borderRadius: radius.xs,
+    backgroundColor: 'rgba(9, 15, 24, 0.82)',
     paddingHorizontal: 6,
     paddingVertical: 2,
+    borderRadius: radius.xs,
+  },
+  progressTrack: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   captionWrap: {
-    marginTop: 5,
+    marginTop: 6,
     paddingHorizontal: 2,
   },
 });
