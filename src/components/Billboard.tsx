@@ -86,7 +86,7 @@ export function Billboard({
     <View style={[styles.wrap, { width, height }]}>
       <Pressable
         style={StyleSheet.absoluteFill}
-        onPress={() => onInfo(current)}
+        onPress={() => (onOpen ? onOpen(current) : onInfo ? onInfo(current) : undefined)}
         onLongPress={() => {
           if (pool.length > 1) switchSlide((index + 1) % pool.length);
         }}

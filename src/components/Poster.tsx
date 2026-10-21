@@ -15,7 +15,10 @@ import { Txt } from './Txt';
 export const POSTER = { width: 118, height: 176 } as const;
 
 export function categoryOf(title: Title): string {
-  return title.kind === 'series' ? 'TV' : title.kind === 'anime' ? 'Anime' : 'Movie';
+  if (title.genres.some((g) => g.toLowerCase() === 'anime') || title.source === 'animedirect' || title.source === 'anilist') {
+    return 'Anime';
+  }
+  return title.kind === 'series' ? 'TV' : 'Movie';
 }
 
 const TINTS = ['#0D1F2D', '#0E2438', '#112A3E', '#14263B', '#0F292E', '#17253B', '#122234', '#0C1E2C'];

@@ -406,7 +406,9 @@ class ServerEngineManager {
 export const serverEngine = new ServerEngineManager();
 
 export function ensureServerEngineInitialized(): void {
-  serverEngine.init();
+  if (serverEngine.state.onlineCount === 0 && serverEngine.state.phase === 'IDLE') {
+    serverEngine.runQuickProbe().catch(() => undefined);
+  }
 }
 
 export function useServerEngine() {
