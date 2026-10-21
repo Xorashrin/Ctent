@@ -665,7 +665,7 @@ function buildGatherers(title: Title, episode: Episode | undefined, quick: boole
       if (detailed.files) {
         add(
           detailed.files.map((f, i) =>
-            fileServer(ctx, `ar:${title.id}:${i}`, 'Internet Archive', f.url, [f.url], f.label, 'local', true),
+            fileServer(ctx, `ar:${title.id}:${i}`, 'Internet Archive', f.url, [f.url], f.label, 'bdix', true),
           ),
         );
       }

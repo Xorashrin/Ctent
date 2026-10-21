@@ -164,13 +164,16 @@ export function ShimmerBox({
 export function LivePulseDot({
   color = colors.mint,
   size = 8,
+  pulsing = true,
 }: {
   color?: string;
   size?: number;
+  pulsing?: boolean;
 }) {
   const pulse = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (!pulsing) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1, duration: 950, easing: Easing.out(Easing.quad), useNativeDriver: true }),
@@ -179,7 +182,7 @@ export function LivePulseDot({
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse]);
+  }, [pulse, pulsing]);
 
   const ringScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 2.2] });
   const ringOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.55, 0] });

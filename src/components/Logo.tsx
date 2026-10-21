@@ -49,6 +49,10 @@ export function MythTubeWordmark({ height = 28, showBadge = true }: { height?: n
   );
 }
 
+export function Wordmark({ size = 20 }: { size?: number }) {
+  return <MythTubeWordmark height={Math.round(size * 1.35)} />;
+}
+
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   emblem: {

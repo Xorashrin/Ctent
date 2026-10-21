@@ -65,7 +65,6 @@ function docToTitle(doc: ArchiveDoc): Title | null {
     poster,
     background: poster,
     quality: ['MP4', 'Direct'],
-    hdLabel: 'DIRECT',
     imdbRating: rating,
     serverName: 'Archive.org',
     detailed: false,
@@ -77,7 +76,7 @@ export async function archiveOrgFeatured(limit = 28): Promise<Title[]> {
     const url =
       `https://archive.org/advancedsearch.php?q=collection:(feature_films+OR+publicmovies212)+AND+mediatype:(movies)` +
       `&fl[]=identifier,title,year,description,avg_rating,downloads&sort[]=downloads+desc&rows=${limit}&page=1&output=json`;
-    const data = await getJson<ArchiveSearchResponse>(url, { timeoutMs: 10000 });
+    const data = await getJson<ArchiveSearchResponse>(url, { timeout: 10000 });
     const docs = data?.response?.docs ?? [];
     const out: Title[] = [];
     for (const d of docs) {
@@ -98,7 +97,7 @@ export async function archiveOrgSearch(query: string, limit = 20): Promise<Title
     const url =
       `https://archive.org/advancedsearch.php?q=${encoded}` +
       `&fl[]=identifier,title,year,description,avg_rating,downloads&sort[]=downloads+desc&rows=${limit}&page=1&output=json`;
-    const data = await getJson<ArchiveSearchResponse>(url, { timeoutMs: 9000 });
+    const data = await getJson<ArchiveSearchResponse>(url, { timeout: 9000 });
     const docs = data?.response?.docs ?? [];
     const out: Title[] = [];
     for (const d of docs) {
@@ -117,7 +116,7 @@ export async function archiveOrgDetail(title: Title): Promise<Title> {
     const identifier = title.ref;
     const meta = await getJson<ArchiveMetaResponse>(
       `https://archive.org/metadata/${encodeURIComponent(identifier)}`,
-      { timeoutMs: 10000 },
+      { timeout: 10000 },
     );
     const files = (meta?.files ?? []).filter((f) => {
       const n = (f.name ?? '').toLowerCase();

@@ -208,10 +208,10 @@ export default function HomeScreen({ route, navigation }: Props) {
               title={hero}
               pool={spotlightPool}
               inMyList={profileData.myList.includes(hero.id)}
-              isSaved={(id) => profileData.myList.includes(id)}
+              isSaved={(id: string) => profileData.myList.includes(id)}
               onOpen={openTitle}
               onPlay={playTitle}
-              onToggleList={(t) => {
+              onToggleList={(t: Title) => {
                 const exists = profileData.myList.includes(t.id);
                 toggleMyList(t.id);
                 showToast(exists ? 'Removed from My Space' : 'Saved to My Space');

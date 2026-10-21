@@ -78,7 +78,6 @@ function parseVodM3u(raw: string, src: VodPlaylistSource, limit = 60): Title[] {
           poster: logo,
           background: logo,
           quality: ['1080P', 'Direct'],
-          hdLabel: 'VOD',
           directUrl: line,
           files: [{ url: line, label: `${cleanName} (Direct Stream)` }],
           serverName: src.name,
@@ -96,7 +95,7 @@ export async function vodM3uFeatured(limit = 36): Promise<Title[]> {
   const results = await Promise.all(
     VOD_M3U_SOURCES.map(async (src) => {
       try {
-        const raw = await getText(src.url, { timeoutMs: 8500 });
+        const raw = await getText(src.url, { timeout: 8500 });
         return parseVodM3u(raw, src, 30);
       } catch {
         return [];

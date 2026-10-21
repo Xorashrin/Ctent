@@ -410,6 +410,10 @@ export function progressFor(data: ProfileData, titleId: string): ProgressEntry |
   return data.progress.find((p) => p.titleId === titleId);
 }
 
+export function inMyList(data: ProfileData, titleId: string): boolean {
+  return data.myList.includes(titleId);
+}
+
 export function downloadFor(data: ProfileData, titleId: string, episodeId?: string): DownloadEntry | undefined {
   return data.downloads.find((d) => same(d, titleId, episodeId));
 }

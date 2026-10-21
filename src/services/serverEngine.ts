@@ -405,6 +405,10 @@ class ServerEngineManager {
 
 export const serverEngine = new ServerEngineManager();
 
+export function ensureServerEngineInitialized(): void {
+  serverEngine.init();
+}
+
 export function useServerEngine() {
   const [, setTick] = useState(0);
   useEffect(() => serverEngine.subscribe(() => setTick((t) => t + 1)), []);

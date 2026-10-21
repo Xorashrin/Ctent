@@ -13,6 +13,7 @@ type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 interface Props {
   label?: string;
   selected?: boolean;
+  solid?: boolean;
   caret?: boolean;
   icon?: IoniconName;
   badge?: string | number;

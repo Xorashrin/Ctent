@@ -289,7 +289,7 @@ export async function fetchIptvPlaylistChannels(source: IptvPlaylistSource, limi
   if (hit && hit.length > 0) return hit.slice(0, limit);
 
   try {
-    const raw = await getText(source.url, { timeoutMs: 9000 });
+    const raw = await getText(source.url, { timeout: 9000 });
     const lines = raw.split(/\r?\n/);
     const out: Channel[] = [];
     let pending: string | null = null;

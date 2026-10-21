@@ -16,27 +16,43 @@ import { Txt } from './Txt';
 
 interface Props {
   title: Title;
+  pool?: Title[];
   candidates?: Title[];
-  onPlay: () => void;
-  onInfo: (target?: Title) => void;
+  inMyList?: boolean;
+  isSaved?: (id: string) => boolean;
+  onPlay?: ((target: Title) => void) | (() => void);
   onPlayTarget?: (target: Title) => void;
+  onOpen?: (target: Title) => void;
+  onInfo?: (target?: Title) => void;
+  onToggleList?: (target: Title) => void;
 }
 
-export function Billboard({ title, candidates, onPlay, onInfo, onPlayTarget }: Props) {
+export function Billboard({
+  title,
+  pool: propPool,
+  candidates,
+  inMyList: propInMyList,
+  isSaved,
+  onPlay,
+  onPlayTarget,
+  onOpen,
+  onInfo,
+  onToggleList,
+}: Props) {
   const { width } = useWindowDimensions();
   const { profileData, toggleMyList, showToast } = useApp();
 
   const pool = React.useMemo(() => {
-    const list = candidates && candidates.length > 0 ? candidates.slice(0, 6) : [title];
+    const list = propPool && propPool.length > 0 ? propPool.slice(0, 6) : candidates && candidates.length > 0 ? candidates.slice(0, 6) : [title];
     return list.length > 0 ? list : [title];
-  }, [candidates, title]);
+  }, [propPool, candidates, title]);
 
   const [index, setIndex] = useState(0);
   const fade = useRef(new Animated.Value(1)).current;
   const slideY = useRef(new Animated.Value(0)).current;
 
   const current = pool[index % pool.length] ?? title;
-  const listed = inMyList(profileData, current.id);
+  const listed = isSaved ? isSaved(current.id) : propInMyList !== undefined ? propInMyList : inMyList(profileData, current.id);
   const height = Math.min(460, Math.round(width * 1.08));
 
   const switchSlide = useCallback(
@@ -140,7 +156,10 @@ export function Billboard({ title, candidates, onPlay, onInfo, onPlayTarget }: P
         <View style={styles.actions}>
           <PressableScale
             scaleTo={0.95}
-            onPress={() => (onPlayTarget ? onPlayTarget(current) : onPlay())}
+            onPress={() => {
+              if (onPlayTarget) onPlayTarget(current);
+              else if (onPlay) (onPlay as (t: Title) => void)(current);
+            }}
           >
             <LinearGradient
               colors={GRADIENTS.pill}
@@ -157,7 +176,10 @@ export function Billboard({ title, candidates, onPlay, onInfo, onPlayTarget }: P
 
           <PressableScale
             scaleTo={0.95}
-            onPress={() => onInfo(current)}
+            onPress={() => {
+              if (onOpen) onOpen(current);
+              else if (onInfo) onInfo(current);
+            }}
             style={styles.glassPill}
           >
             <Ionicons name="information-circle-outline" size={18} color={colors.text} />
@@ -169,8 +191,11 @@ export function Billboard({ title, candidates, onPlay, onInfo, onPlayTarget }: P
           <PressableScale
             scaleTo={0.92}
             onPress={() => {
-              toggleMyList(current.id);
-              showToast(listed ? 'Removed from My List' : 'Added to My List');
+              if (onToggleList) onToggleList(current);
+              else {
+                toggleMyList(current.id);
+                showToast(listed ? 'Removed from My Space' : 'Saved to My Space');
+              }
             }}
             style={[styles.iconCircle, listed ? styles.iconCircleActive : null]}
           >

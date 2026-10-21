@@ -14,6 +14,10 @@ import { Txt } from './Txt';
 
 export const POSTER = { width: 118, height: 176 } as const;
 
+export function categoryOf(title: Title): string {
+  return title.kind === 'series' ? 'TV' : title.kind === 'anime' ? 'Anime' : 'Movie';
+}
+
 const TINTS = ['#0D1F2D', '#0E2438', '#112A3E', '#14263B', '#0F292E', '#17253B', '#122234', '#0C1E2C'];
 
 function tintFor(id: string): string {
@@ -29,6 +33,7 @@ interface Props {
   aspect?: 'poster' | 'backdrop';
   progress?: number;
   badge?: string;
+  label?: string;
   altCount?: number;
   showTitle?: boolean;
   onPress?: (title: Title) => void;
@@ -41,6 +46,7 @@ export const Poster = memo(function Poster({
   aspect = 'poster',
   progress,
   badge,
+  label,
   altCount,
   showTitle = false,
   onPress,
@@ -68,10 +74,11 @@ export const Poster = memo(function Poster({
 
   // Single clean top-right badge to avoid visual clutter
   const extraServers = altCount ?? title.alternatives?.length ?? 0;
+  const qualityBadge = title.quality?.[0] && title.quality[0] !== 'HD' ? title.quality[0] : undefined;
   const topRightLabel =
     extraServers > 0
       ? `+${extraServers + 1} Servers`
-      : badge || (title.hdLabel && title.hdLabel !== 'HD' ? title.hdLabel : undefined);
+      : badge || label || qualityBadge;
 
   return (
     <Pressable

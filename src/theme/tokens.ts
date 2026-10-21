@@ -10,7 +10,9 @@ export const colors = {
   sapphire: '#3B82F6',
   amber: '#F59E0B',
   coral: '#F43F5E',
+  rose: '#F43F5E',
   lime: '#10B981',
+  emerald: '#10B981',
   orange: '#F97316',
 
   // Semantic aliases used across shared components (mapped to Aurora Mint & Glacier Cyan)
@@ -37,6 +39,7 @@ export const colors = {
   surface5: '#2C4263',
   surface6: '#385278',
   border: 'rgba(148, 163, 184, 0.14)',
+  borderStrong: 'rgba(148, 163, 184, 0.32)',
   glassBorder: 'rgba(255, 255, 255, 0.16)',
   outline: 'rgba(148, 163, 184, 0.14)',
   outlineActive: 'rgba(0, 229, 176, 0.48)',
