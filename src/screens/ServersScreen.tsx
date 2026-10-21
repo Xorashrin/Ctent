@@ -49,7 +49,7 @@ function badgeForType(t: ServerType): { label: string; color: string; icon: Reac
     case 'MEDIA_SITE':
       return { label: 'Media Portal', color: colors.orange, icon: 'movie-open-outline' };
     case 'ANIME_WEB':
-      return { label: 'Anime Portal', color: colors.pink, icon: 'sparkles' };
+      return { label: 'Anime Portal', color: colors.pink, icon: 'star-four-points' };
     default:
       return { label: 'BDIX Host', color: colors.textMuted, icon: 'server-network' };
   }

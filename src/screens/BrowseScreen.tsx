@@ -38,8 +38,8 @@ const SORTS: { key: BrowseSort; label: string }[] = [
 ];
 
 export default function BrowseScreen({ navigation, route }: Props) {
-  const serverName = route.params.title ?? 'BDIX Server';
-  const [currentUrl, setCurrentUrl] = useState(route.params.url);
+  const serverName = route.params?.title ?? 'CircleFTP Index';
+  const [currentUrl, setCurrentUrl] = useState(route.params?.url ?? 'http://index2.circleftp.net/FILE/');
   const [listing, setListing] = useState<ParsedListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

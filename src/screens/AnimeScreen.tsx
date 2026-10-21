@@ -178,7 +178,7 @@ export default function AnimeScreen() {
                     style={[styles.portalCard, { borderColor: `${accent}55` }]}
                   >
                     <View style={[styles.portalIcon, { backgroundColor: `${accent}22` }]}>
-                      <MaterialCommunityIcons name="sparkles" size={18} color={accent} />
+                      <MaterialCommunityIcons name="star-four-points" size={18} color={accent} />
                     </View>
                     <Txt weight="bold" size={13} numberOfLines={1} style={{ marginTop: 8 }}>
                       {p.name}

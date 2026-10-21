@@ -11,6 +11,12 @@ export const colors = {
   cyan: '#3DDCFF',
   lime: '#9DFF6A',
   orange: '#FF8A3D',
+  accentPurple: '#3B1CFF',
+  accentViolet: '#8B2CF5',
+  accentMagenta: '#E21CF0',
+  accentPink: '#FF2D95',
+  outline: 'rgba(255,255,255,0.14)',
+  outlineActive: 'rgba(226,28,240,0.45)',
 
   // Legacy aliases mapped to Ctent Electric Violet & Magenta so shared components stay 100% Ctent-styled
   red: '#8B2CF5',

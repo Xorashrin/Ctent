@@ -15,7 +15,7 @@ export type RootStackParamList = {
   Title: { id: string; season?: number };
   Player: { id: string; episodeId?: string };
   Live: { channelId: string; filter?: string };
-  Browse: { serverId?: string; url: string; title?: string };
+  Browse: { serverId?: string; url?: string; title?: string } | undefined;
   Catalog: { rowKey?: string; title: string; genre?: string; anime?: boolean };
   ServersModal: undefined;
   Search: { genre?: string; kind?: 'movie' | 'series' | 'anime'; live?: boolean } | undefined;
